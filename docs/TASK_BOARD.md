@@ -1,0 +1,80 @@
+# BẢNG NHẬN VIỆC (TASK BOARD)
+
+> Đọc [`AGENTS.md`](../AGENTS.md) trước khi nhận việc. ID task khớp với [`KE_HOACH_DO_AN.md`](KE_HOACH_DO_AN.md).
+> Trạng thái: `⬜ Chưa làm` · `🔄 Đang làm` · `👀 Chờ duyệt/merge` · `✅ Xong` · `⛔ Bị chặn`
+
+## Phân luồng
+
+| Luồng | Agent | Phạm vi |
+|-------|-------|---------|
+| **A — Lõi & chất lượng** | **Claude Code** | Tái cấu trúc (`ProgressService`, `HintService`), logic sao, asmdef test, CI, coverage, README |
+| **B — Dịch vụ online** | **Codex** | Unity Gaming Services: đăng nhập ẩn danh, Cloud Save, Analytics, Leaderboard, Remote Config |
+| **C — Thiết kế, kiểm thử & tài liệu** | **Antigravity** | GDD, kế hoạch & ca kiểm thử, test PlayMode cho tính năng mới, UI sao (script), báo cáo, slide |
+| **U — Cần người dùng** | **Người dùng** | Thao tác Unity Editor / tài khoản: build APK, dashboard Unity, GitHub settings, thiết kế màn, playtest |
+
+> Báo cáo Word (`docs/DACN_*.docx`) đang được một agent chỉnh sửa (Chương 1) — agent đó tiếp tục phụ trách các task báo cáo; agent khác **không** sửa file `.docx`.
+
+## Tuần 1 — Nền tảng (21/10 – 27/10)
+
+| ID | Task | Agent | Trạng thái | Nhánh / Ghi chú |
+|----|------|-------|-----------|-----------------|
+| W1-02 | Build thử APK Android, ghi lỗi | Người dùng | ⬜ | Làm sau khi merge W1-03 |
+| W1-03 | asmdef cho `Tests_EditMode` (chỉ Editor) | Claude Code | 🔄 | `agent/claude-core` |
+| W1-04 | GitHub Actions + GameCI chạy test | Claude Code | 🔄 | `agent/claude-core` — người dùng cần thêm secrets |
+| W1-05 | Bảo vệ nhánh `main` trên GitHub | Người dùng | ⬜ | Settings → Branches |
+| W1-06 | Class diagram hiện tại & mục tiêu | Claude Code | 🔄 | `docs/KIEN_TRUC.md` (PlantUML) |
+| W1-07 | Cài package UGS (Auth, Cloud Save, Analytics, Leaderboards) | Codex | ⬜ | Người dùng liên kết Project ID trên Unity Cloud trước |
+| W1-08 | Đăng nhập ẩn danh khi mở game | Codex | ⬜ | |
+| W1-09 | Schema Cloud Save & sự kiện Analytics | Codex | ⬜ | Theo Phụ lục A, B kế hoạch |
+| W1-10 | GDD Chương 6 & 7 (8 màn) | Antigravity | ⬜ | `docs/GDD_Chuong6_7.md` |
+| W1-11 | Bảng quyết định luật 3 sao | Antigravity | ⬜ | Đối chiếu với `StarCalculator` của Claude |
+| W1-12 | Dựng Level 21–22 trong Unity | Người dùng | ⬜ | Theo GDD |
+| W1-13 | Kế hoạch kiểm thử | Antigravity | ⬜ | `docs/KE_HOACH_KIEM_THU.md` |
+| W1-14 | Rà soát test cũ + ma trận truy vết | Antigravity | ⬜ | |
+| W1-15 | Báo cáo Chương 1 + Use Case | Agent viết báo cáo | 🔄 | `docs/DACN_da_sua_chuong_1.docx` |
+
+## Tuần 2 — Tính năng chính (28/10 – 03/11)
+
+| ID | Task | Agent | Trạng thái | Nhánh / Ghi chú |
+|----|------|-------|-----------|-----------------|
+| W2-01 | `ProgressService` + `IProgressStore` + `LocalProgressStore` | Claude Code | 🔄 | `agent/claude-core` |
+| W2-02 | Unit test `ProgressService` | Claude Code | 🔄 | |
+| W2-03 | Tách `HintService` khỏi `LevelManager` | Claude Code | ⬜ | |
+| W2-05 | `CloudProgressStore` (implements `IProgressStore`) | Codex | ⬜ | Phụ thuộc W2-01 (interface trong `AGENTS.md`) |
+| W2-06 | Xử lý mất mạng, đồng bộ lại | Codex | ⬜ | |
+| W2-07 | `UnityAnalyticsReporter` (implements `IAnalyticsReporter`) + popup đồng ý | Codex | ⬜ | Claude gắn điểm gọi sự kiện vào `LevelManager` |
+| W2-08 | Dựng Level 23–24 | Người dùng | ⬜ | |
+| W2-09a | Logic 3 sao `StarCalculator` + theo dõi chết/hint trong màn | Claude Code | 🔄 | |
+| W2-09b | UI sao trên `WinCanvas` & nút LevelSelect (script + tool gán) | Antigravity | ⬜ | Phụ thuộc W2-09a |
+| W2-10 | Ca kiểm thử: sao, gộp cloud, mở khóa | Antigravity | ⬜ | |
+| W2-11 | Test PlayMode cho sao & mở khóa | Antigravity | ⬜ | |
+| W2-12 | Báo cáo Chương 2 + sequence diagram | Agent viết báo cáo | ⬜ | |
+
+## Tuần 3 — Hoàn thiện & playtest (04/11 – 10/11)
+
+| ID | Task | Agent | Trạng thái | Nhánh / Ghi chú |
+|----|------|-------|-----------|-----------------|
+| W3-01 | Code coverage | Claude Code | ⬜ | |
+| W3-02 | Đo hiệu năng trên điện thoại | Người dùng | ⬜ | |
+| W3-03 | CI build APK khi push tag | Claude Code | ⬜ | |
+| W3-05 | Leaderboard + màn hình xếp hạng | Codex | ⬜ | |
+| W3-06 | Remote Config | Codex | ⬜ | |
+| W3-07 | Dựng Level 25–28 | Người dùng | ⬜ | |
+| W3-09 | Playtest ≥ 10 người | Người dùng | ⬜ | Form khảo sát: Antigravity soạn |
+| W3-10 | Kiểm thử hồi quy | Antigravity | ⬜ | |
+| W3-11 | Báo cáo Chương 3 | Agent viết báo cáo | ⬜ | |
+
+## Tuần 4 — Đóng gói (11/11 – 17/11)
+
+| ID | Task | Agent | Trạng thái | Nhánh / Ghi chú |
+|----|------|-------|-----------|-----------------|
+| W4-01 | Phân tích số liệu playtest | Codex + Antigravity | ⬜ | |
+| W4-02 | Cân bằng độ khó | Người dùng | ⬜ | |
+| W4-04 | Build release v1.0 + README | Claude Code (README) + Người dùng (build) | ⬜ | |
+| W4-05 | Hồi quy trên ≥ 2 điện thoại | Người dùng | ⬜ | Checklist: Antigravity |
+| W4-06 | Báo cáo Chương 4–6 | Agent viết báo cáo | ⬜ | |
+| W4-07 | Slide + video demo | Antigravity (slide) + Người dùng (video) | ⬜ | |
+
+## Ghi chú / yêu cầu giữa các agent
+
+- *(Ghi theo dạng: `[Từ agent] → [Đến agent]: nội dung`)*

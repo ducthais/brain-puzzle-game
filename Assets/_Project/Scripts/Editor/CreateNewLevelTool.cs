@@ -82,6 +82,7 @@ public class CreateNewLevelTool : EditorWindow
 
     private void CreateLevels(int lastLevel)
     {
+        if (!EnsureNotPlaying()) return;
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
         string templatePath = AssetDatabase.GetAssetPath(templateScene);
@@ -149,8 +150,7 @@ public class CreateNewLevelTool : EditorWindow
                 "- nextLevelName: ✅\n" +
                 "- Hint: ✅\n" +
                 "- Nút LevelSelect: ✅\n\n" +
-                "Hãy mở scene mới để thiết kế bản đồ.\n" +
-                "Nếu có Chương mới, hãy kiểm tra vị trí nút Chương trong LevelSelect.", "OK");
+                "Hãy mở scene mới để thiết kế bản đồ.", "OK");
 
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<SceneAsset>(GetLevelScenePath(created[created.Count - 1])));
             hints = new List<string> { "" };
@@ -296,7 +296,7 @@ public class CreateNewLevelTool : EditorWindow
         manager.chapterButtons = chapterButtons.ToArray();
         EditorUtility.SetDirty(manager);
 
-        if (addedChapter) FitChapterButtons(chapterButtons);
+        if (addedChapter) SetupChapterScrollBar(chapterButtons);
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
@@ -319,16 +319,10 @@ public class CreateNewLevelTool : EditorWindow
         }
         chapterPanels.Add(newPanel);
 
-        // Nút chương: copy nút cuối, dịch sang phải một khoảng bằng khoảng cách giữa 2 nút cuối
+        // Nút chương: copy nút cuối (vị trí do thanh cuộn tự sắp xếp)
         Image lastButton = chapterButtons.Last();
         Image newButton = Object.Instantiate(lastButton, lastButton.transform.parent);
         newButton.name = "ChapterBtn_" + chapterNumber;
-
-        RectTransform lastRect = lastButton.rectTransform;
-        float spacing = chapterButtons.Count >= 2
-            ? lastRect.anchoredPosition.x - chapterButtons[chapterButtons.Count - 2].rectTransform.anchoredPosition.x
-            : lastRect.rect.width;
-        newButton.rectTransform.anchoredPosition = lastRect.anchoredPosition + new Vector2(spacing, 0);
 
         Button button = newButton.GetComponent<Button>();
         if (button != null) SetPersistentIntArgument(button, "SelectChapter", chapterNumber);
@@ -338,33 +332,166 @@ public class CreateNewLevelTool : EditorWindow
         Debug.Log($"✅ Đã tạo Chương {chapterNumber}");
     }
 
-    /// <summary>
-    /// Nếu các nút Chương tràn ra ngoài TopBar thì dàn đều lại và thu nhỏ cho vừa.
-    /// </summary>
-    private static void FitChapterButtons(List<Image> chapterButtons)
+    // Thiết kế gốc: nút Chương scale 0.8, cách lề 68, cách nhau 54 → vừa 5 nút trên màn rộng 1920
+    private const float ChapterButtonScale = 0.8f;
+    private const int ChapterBarPadding = 68;
+    private const float ChapterBarSpacing = 54f;
+
+    // Vị trí khung be (thanh Chương) vẽ sẵn trong ảnh nền mapOrigin.jpg, tính theo % chiều rộng ảnh
+    private const float BannerLeftRatio = 0.0433f;
+    private const float BannerRightRatio = 0.9593f;
+    private const float BannerInset = 8f;
+
+    [MenuItem("Tools/Sửa thanh Chương (cuộn ngang)")]
+    public static void SetupChapterScrollBarMenu()
     {
-        RectTransform topBar = chapterButtons[0].rectTransform.parent as RectTransform;
-        if (topBar == null) return;
+        if (!EnsureNotPlaying()) return;
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
-        float availableWidth = topBar.rect.width;
-        RectTransform last = chapterButtons.Last().rectTransform;
-        float rightEdge = last.anchoredPosition.x + last.rect.width * last.localScale.x * (1 - last.pivot.x);
-        if (availableWidth <= 0 || rightEdge <= availableWidth) return;
+        var scene = EditorSceneManager.GetActiveScene();
+        if (scene.path != LevelSelectScenePath)
+            scene = EditorSceneManager.OpenScene(LevelSelectScenePath, OpenSceneMode.Single);
 
-        int count = chapterButtons.Count;
-        float slotWidth = availableWidth / count;
-        foreach (Image img in chapterButtons)
+        LevelSelectManager manager = Object.FindFirstObjectByType<LevelSelectManager>(FindObjectsInactive.Include);
+        if (manager == null || manager.chapterButtons == null || manager.chapterButtons.Length == 0)
         {
-            float scale = Mathf.Min(img.rectTransform.localScale.x, slotWidth * 0.95f / img.rectTransform.rect.width);
-            img.rectTransform.localScale = new Vector3(scale, scale, 1);
+            Debug.LogError("❌ Không tìm thấy LevelSelectManager hoặc nút Chương.");
+            return;
         }
-        for (int i = 0; i < count; i++)
+
+        SetupChapterScrollBar(manager.chapterButtons.Where(b => b != null).ToList());
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+    }
+
+    /// <summary>
+    /// Biến TopBar thành thanh cuộn ngang:
+    /// TopBar (ScrollRect) → Viewport (RectMask2D) → Content (HorizontalLayoutGroup) → các nút Chương.
+    /// Chạy lại nhiều lần vẫn an toàn (chỉ tạo Viewport/Content ở lần đầu).
+    /// </summary>
+    private static void SetupChapterScrollBar(List<Image> chapterButtons)
+    {
+        Transform parent = chapterButtons[0].transform.parent;
+        ScrollRect scrollRect = parent.GetComponentInParent<ScrollRect>(true);
+        RectTransform content;
+
+        if (scrollRect != null && scrollRect.content == parent)
+        {
+            content = scrollRect.content;
+        }
+        else
+        {
+            RectTransform topBar = (RectTransform)parent;
+
+            RectTransform viewport = CreateRect("Viewport", topBar);
+            viewport.anchorMin = Vector2.zero;
+            viewport.anchorMax = Vector2.one;
+            viewport.offsetMin = Vector2.zero;
+            viewport.offsetMax = Vector2.zero;
+            viewport.gameObject.AddComponent<RectMask2D>();
+
+            content = CreateRect("Content", viewport);
+            content.anchorMin = new Vector2(0, 0);
+            content.anchorMax = new Vector2(0, 1);
+            content.pivot = new Vector2(0, 0.5f);
+            content.anchoredPosition = Vector2.zero;
+            content.sizeDelta = Vector2.zero;
+
+            scrollRect = GetOrAdd<ScrollRect>(topBar.gameObject);
+            scrollRect.horizontal = true;
+            scrollRect.vertical = false;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+            scrollRect.viewport = viewport;
+            scrollRect.content = content;
+        }
+
+        FitViewportToBanner(scrollRect.viewport, (RectTransform)scrollRect.transform);
+
+        HorizontalLayoutGroup layout = GetOrAdd<HorizontalLayoutGroup>(content.gameObject);
+        layout.padding = new RectOffset(ChapterBarPadding, ChapterBarPadding, 0, 0);
+        layout.spacing = ChapterBarSpacing;
+        layout.childAlignment = TextAnchor.MiddleLeft;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+        layout.childScaleWidth = true;
+        layout.childScaleHeight = true;
+
+        ContentSizeFitter fitter = GetOrAdd<ContentSizeFitter>(content.gameObject);
+        fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        fitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+        for (int i = 0; i < chapterButtons.Count; i++)
         {
             RectTransform rect = chapterButtons[i].rectTransform;
-            rect.anchoredPosition = new Vector2(slotWidth * (i + 0.5f), rect.anchoredPosition.y);
+            rect.SetParent(content, false);
+            rect.SetSiblingIndex(i);
+            rect.localScale = new Vector3(ChapterButtonScale, ChapterButtonScale, 1);
         }
 
-        Debug.Log("ℹ Các nút Chương bị tràn TopBar → đã dàn đều và thu nhỏ lại. Có thể chỉnh tay nếu muốn.");
+        LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+        Debug.Log($"✅ Thanh Chương dạng cuộn ngang: {chapterButtons.Count} chương.");
+    }
+
+    /// <summary>
+    /// Khung be của thanh Chương nằm trong ảnh nền "BG" (kích thước cố định), còn TopBar co giãn theo màn hình.
+    /// → Thu Viewport lại đúng bằng khung be để nút không tràn ra ngoài khi màn hình rộng.
+    /// </summary>
+    private static void FitViewportToBanner(RectTransform viewport, RectTransform topBar)
+    {
+        // Image trong suốt để kéo được cả ở khoảng trống giữa các nút
+        Image dragArea = GetOrAdd<Image>(viewport.gameObject);
+        dragArea.color = Color.clear;
+
+        // Làm mờ dần 2 mép để người chơi biết còn chương để cuộn
+        GetOrAdd<RectMask2D>(viewport.gameObject).softness = new Vector2Int(24, 0);
+
+        RectTransform bg = topBar.parent != null ? topBar.parent.Find("BG") as RectTransform : null;
+        if (bg == null)
+        {
+            Debug.LogWarning("⚠ Không tìm thấy ảnh nền 'BG' → Viewport giữ nguyên chiều rộng TopBar.");
+            return;
+        }
+
+        Rect bgRect = bg.rect;
+        Vector3 leftWorld = bg.TransformPoint(new Vector3(bgRect.xMin + bgRect.width * BannerLeftRatio, 0, 0));
+        Vector3 rightWorld = bg.TransformPoint(new Vector3(bgRect.xMin + bgRect.width * BannerRightRatio, 0, 0));
+        float left = topBar.InverseTransformPoint(leftWorld).x + BannerInset;
+        float right = topBar.InverseTransformPoint(rightWorld).x - BannerInset;
+
+        viewport.anchorMin = new Vector2(0.5f, 0);
+        viewport.anchorMax = new Vector2(0.5f, 1);
+        viewport.pivot = new Vector2(0.5f, 0.5f);
+        viewport.sizeDelta = new Vector2(right - left, 0);
+        viewport.anchoredPosition = new Vector2((left + right) / 2f - topBar.rect.center.x, 0);
+    }
+
+    /// <summary>
+    /// Unity không cho mở/lưu scene khi đang Play → báo người dùng thoát Play mode trước.
+    /// </summary>
+    private static bool EnsureNotPlaying()
+    {
+        if (!EditorApplication.isPlayingOrWillChangePlaymode) return true;
+
+        EditorUtility.DisplayDialog("Đang ở Play mode",
+            "Không thể sửa scene khi game đang chạy.\nHãy bấm nút ▶ Play lần nữa để dừng game, rồi chạy lại lệnh này.", "OK");
+        return false;
+    }
+
+    private static RectTransform CreateRect(string name, Transform parent)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform));
+        go.layer = parent.gameObject.layer;
+        RectTransform rect = (RectTransform)go.transform;
+        rect.SetParent(parent, false);
+        return rect;
+    }
+
+    private static T GetOrAdd<T>(GameObject go) where T : Component
+    {
+        T component = go.GetComponent<T>();
+        return component != null ? component : go.AddComponent<T>();
     }
 
     private static void SetPersistentIntArgument(Button owner, string methodName, int value)
