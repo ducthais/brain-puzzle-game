@@ -10,7 +10,16 @@ public class TextTrigger : MonoBehaviour
         // Kiểm tra xem có phải Nhân vật chính chạm vào không
         if (collision.CompareTag("Player"))
         {
-            // Kích hoạt Canvas chiến thắng
+            // Thắng qua LevelManager để lưu tiến trình, mở khóa màn sau và tính sao
+            LevelManager levelManager = FindAnyObjectByType<LevelManager>();
+            if (levelManager != null)
+            {
+                if (winCanvas != null) winCanvas.SetActive(true);
+                levelManager.WinGame();
+                return;
+            }
+
+            // Dự phòng khi scene thiếu LevelManager: chỉ hiện Canvas chiến thắng
             if (winCanvas != null)
             {
                 winCanvas.SetActive(true);

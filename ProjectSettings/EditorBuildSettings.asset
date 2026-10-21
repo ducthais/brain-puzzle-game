@@ -74,5 +74,26 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/Level 21.unity
     guid: 27582b0e50582ca47a72e217a27324fa
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level 22.unity
+    guid: e8d0fe23767422849bb3ffa78abf072f
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level 23.unity
+    guid: 2ac6f248406ea004d8673205b130e74a
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level 24.unity
+    guid: 79321ae1b0a629940a6f9e9a00f9df0d
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level 25.unity
+    guid: b29e6ddc443c09c41a3b55759421d512
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level 26.unity
+    guid: 9eafafc26f766ec4cb7cc4d62687d29b
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level 27.unity
+    guid: 75e4dc90960da6c4f8ed032637ec77a5
+  - enabled: 1
+    path: Assets/_Project/Scenes/Level 28.unity
+    guid: 33972813c768b8942acd8a89dbfc7d24
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}

@@ -85,8 +85,44 @@ public class CreateNewLevelTool : EditorWindow
         if (!EnsureNotPlaying()) return;
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
-        string templatePath = AssetDatabase.GetAssetPath(templateScene);
         SceneSetup[] previousSetup = EditorSceneManager.GetSceneManagerSetup();
+        List<int> created;
+        try
+        {
+            created = CreateLevelsFromTemplate(AssetDatabase.GetAssetPath(templateScene), hints, levelsPerChapter);
+        }
+        finally
+        {
+            if (previousSetup.Length > 0 && previousSetup.Any(s => !string.IsNullOrEmpty(s.path)))
+                EditorSceneManager.RestoreSceneManagerSetup(previousSetup);
+        }
+
+        if (created.Count > 0)
+        {
+            string range = created.Count == 1 ? "Level " + created[0] : $"Level {created[0]} → Level {created[created.Count - 1]}";
+            EditorUtility.DisplayDialog("Thành công",
+                $"Đã tạo {range}.\n\n" +
+                "- Scene + Build Profiles: ✅\n" +
+                "- nextLevelName + nhãn Level trên HUD: ✅\n" +
+                "- Hint: ✅\n" +
+                "- Nút LevelSelect: ✅\n\n" +
+                "Hãy mở scene mới để thiết kế bản đồ.", "OK");
+
+            EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<SceneAsset>(GetLevelScenePath(created[created.Count - 1])));
+            hints = new List<string> { "" };
+            levelCount = 1;
+            templateScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(GetLevelScenePath(created[created.Count - 1]));
+        }
+    }
+
+    /// <summary>
+    /// Tạo các màn tiếp theo sau màn cuối hiện tại từ scene mẫu (mỗi phần tử trong hints là một màn).
+    /// Dùng chung cho cửa sổ tool và các tool dựng màn tự động.
+    /// </summary>
+    public static List<int> CreateLevelsFromTemplate(string templatePath, IList<string> hints, int levelsPerChapter)
+    {
+        int lastLevel = GetLastLevelNumber();
+        int levelCount = hints.Count;
         List<int> created = new List<int>();
 
         try
@@ -129,34 +165,16 @@ public class CreateNewLevelTool : EditorWindow
             if (created.Count > 0)
             {
                 EditorUtility.DisplayProgressBar("Tạo Level mới", "Đang cập nhật LevelSelect", 1f);
-                AddLevelSelectButtons(created);
+                AddLevelSelectButtons(created, levelsPerChapter);
             }
         }
         finally
         {
             EditorUtility.ClearProgressBar();
-            if (previousSetup.Length > 0 && previousSetup.Any(s => !string.IsNullOrEmpty(s.path)))
-                EditorSceneManager.RestoreSceneManagerSetup(previousSetup);
         }
 
         AssetDatabase.SaveAssets();
-
-        if (created.Count > 0)
-        {
-            string range = created.Count == 1 ? "Level " + created[0] : $"Level {created[0]} → Level {created[created.Count - 1]}";
-            EditorUtility.DisplayDialog("Thành công",
-                $"Đã tạo {range}.\n\n" +
-                "- Scene + Build Profiles: ✅\n" +
-                "- nextLevelName: ✅\n" +
-                "- Hint: ✅\n" +
-                "- Nút LevelSelect: ✅\n\n" +
-                "Hãy mở scene mới để thiết kế bản đồ.", "OK");
-
-            EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<SceneAsset>(GetLevelScenePath(created[created.Count - 1])));
-            hints = new List<string> { "" };
-            levelCount = 1;
-            templateScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(GetLevelScenePath(created[created.Count - 1]));
-        }
+        return created;
     }
 
     // ==========================================
@@ -207,11 +225,25 @@ public class CreateNewLevelTool : EditorWindow
         so.FindProperty("nextLevelName").stringValue = nextLevelName;
         so.ApplyModifiedPropertiesWithoutUndo();
 
+        // Scene copy từ màn mẫu → nhãn "Level N" trên HUD vẫn là số của màn mẫu
+        SetHudLevelLabel(System.IO.Path.GetFileNameWithoutExtension(scenePath));
+
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
     }
 
-    private static void AddHint(string levelName, string hintMessage)
+    /// <summary>Đặt chữ "Level N" trên HUD của scene đang mở.</summary>
+    public static void SetHudLevelLabel(string levelName)
+    {
+        foreach (TextMeshProUGUI label in Object.FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include))
+        {
+            if (label.name != "Level number") continue;
+            label.text = levelName;
+            EditorUtility.SetDirty(label);
+        }
+    }
+
+    public static void AddHint(string levelName, string hintMessage)
     {
         string[] guids = AssetDatabase.FindAssets("t:LevelDatabase");
         if (guids.Length == 0)
@@ -242,7 +274,7 @@ public class CreateNewLevelTool : EditorWindow
     // ==========================================
     // LEVEL SELECT
     // ==========================================
-    private void AddLevelSelectButtons(List<int> levelIds)
+    private static void AddLevelSelectButtons(List<int> levelIds, int levelsPerChapter)
     {
         var scene = EditorSceneManager.OpenScene(LevelSelectScenePath, OpenSceneMode.Single);
         LevelSelectManager manager = Object.FindAnyObjectByType<LevelSelectManager>(FindObjectsInactive.Include);

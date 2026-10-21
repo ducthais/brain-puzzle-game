@@ -54,4 +54,18 @@ MonoBehaviour:
   - levelName: Level 20
     hintMessage: "Th\u1EE9 gi\xFAp b\u1EA1n qua m\xE0n kh\xF4ng n\u1EB1m \u1EDF d\u01B0\u1EDBi \u0111\u1EA5t, m\xE0 n\u1EB1m ngay tr\xEAn ch\xEDnh nh\u1EEFng n\xFAt b\u1EA5m b\u1EA1n \u0111ang d\xF9ng. Th\u1EED ch\u1EA1m v\xE0 gi\u1EEF ch\xFAng xem sao?"
   - levelName: Level 21
-    hintMessage: "H\xE3y th\u1EED t\u01B0\u01A1ng t\xE1c v\u1EDBi giao di\u1EC7n xem sao!"
+    hintMessage: "N\xFAt \u27F3 \u1EDF m\xE0n n\xE0y kh\xF4ng ch\u01A1i l\u1EA1i m\xE0 \u0111\u1EC3 l\u1EA1i m\u1ED9t b\u1EA3n sao \u0111\u1EE9ng y\xEAn t\u1EA1i ch\u1ED7. B\u1EA3n sao c\u0169ng l\xE0 b\u1EADc thang!"
+  - levelName: Level 22
+    hintMessage: "M\u1ED9t ng\u01B0\u1EDDi gi\u1EEF c\u1EEDa, m\u1ED9t ng\u01B0\u1EDDi \u0111i qua. \u0110\u1EE9ng tr\xEAn c\xF4ng t\u1EAFc r\u1ED3i b\u1EA5m \u27F3."
+  - levelName: Level 23
+    hintMessage: "Nh\u1EA3y l\xEAn ngay d\u01B0\u1EDBi m\xE9p tr\xE1i t\u1EA5m ch\xF4ng r\u1ED3i b\u1EA5m \u27F3: b\u1EA3n sao gi\u1EEFa kh\xF4ng trung s\u1EBD th\xE0nh c\u1ED9t ch\u1ED1ng tr\u1EA7n."
+  - levelName: Level 24
+    hintMessage: "C\u1EA7n hai b\u1EA3n sao: m\u1ED9t b\u1EA3n \u0111\u1EE9ng gi\u1EEF c\xF4ng t\u1EAFc, m\u1ED9t b\u1EA3n l\xE0m b\u1EADc thang \u1EDF ch\xE2n th\xE1p."
+  - levelName: Level 25
+    hintMessage: "Ch\u1EA1m v\xE0o c\xE2y c\u1EA7u r\u1ED3i k\xE9o l\xEAn/xu\u1ED1ng \u0111\u1EC3 n\xF3 n\u1EB1m ngang."
+  - levelName: Level 26
+    hintMessage: "Kh\xF4ng ph\u1EA3i l\xE1 c\u1EDD n\xE0o c\u0169ng th\u1EADt, kh\xF4ng ph\u1EA3i m\u1EB7t \u0111\u1EA5t n\xE0o c\u0169ng \u0111\u1EE9ng \u0111\u01B0\u1EE3c. Th\u1EED quay l\u1EA1i ph\xEDa sau xem."
+  - levelName: Level 27
+    hintMessage: "\u0110\xE1m m\xE2y k\xE9o \u0111\u01B0\u1EE3c. \u0110\u1EB7t n\xF3 d\u01B0\u1EDBi m\xE9p tr\xE1i t\u1EA5m ch\xF4ng tr\u01B0\u1EDBc khi \u0111i qua."
+  - levelName: Level 28
+    hintMessage: "\u0110\u1EA9y h\u1ED9p l\xEAn c\xF4ng t\u1EAFc \u0111\u1EC3 m\u1EDF c\u1EEDa, r\u1ED3i k\xE9o c\u1EA7u n\u1EB1m ngang."
