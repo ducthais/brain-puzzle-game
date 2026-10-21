@@ -61,19 +61,19 @@
 | W3-06 | Remote Config | Codex | 👀 | `agent/codex-tuan3` — package 4.2.5, GameConfig/Service, nối Ads/hint/skip; 18 test mới + 8 retry cũ pass; cần resolve/biên dịch Remote Config thật |
 | W3-07 | Dựng Level 25–28 | Người dùng | ⬜ | |
 | W3-09 | Playtest ≥ 10 người | Người dùng | ⬜ | Form khảo sát: Antigravity soạn |
-| W3-10 | Kiểm thử hồi quy | Antigravity | ⬜ | |
+| W3-10 | Kiểm thử hồi quy | Antigravity | 👀 | `docs/KIEM_THU_HOI_QUY.md` (35 ca RG-01..35, smoke test 10 phút, ma trận phủ tự động 77.1%) |
 | W3-11 | Báo cáo Chương 3 | Agent viết báo cáo | ⬜ | |
 
 ## Tuần 4 — Đóng gói (11/11 – 17/11)
 
 | ID | Task | Agent | Trạng thái | Nhánh / Ghi chú |
 |----|------|-------|-----------|-----------------|
-| W4-01 | Phân tích số liệu playtest | Codex + Antigravity | ⬜ | |
+| W4-01 | Phân tích số liệu playtest | Codex + Antigravity | ⬜ | Đã có tài liệu mẫu & công thức tại `docs/PHAN_TICH_PLAYTEST.md` |
 | W4-02 | Cân bằng độ khó | Người dùng | ⬜ | |
 | W4-04 | Build release v1.0 + README | Claude Code (README) + Người dùng (build) | 🔄 | README xong; build v1.0 ở tuần 4 |
-| W4-05 | Hồi quy trên ≥ 2 điện thoại | Người dùng | ⬜ | Checklist: Antigravity |
+| W4-05 | Hồi quy trên ≥ 2 điện thoại | Người dùng | ⬜ | Đã có checklist chi tiết tại `docs/CHECKLIST_THIET_BI.md` |
 | W4-06 | Báo cáo Chương 4–6 | Agent viết báo cáo | ⬜ | |
-| W4-07 | Slide + video demo | Antigravity (slide) + Người dùng (video) | ⬜ | |
+| W4-07 | Slide + video demo | Antigravity (slide) + Người dùng (video) | ⬜ | Đã có dàn ý 20 slide & kịch bản video demo 3 phút tại `docs/DAN_Y_SLIDE.md` |
 
 ## Ghi chú / yêu cầu giữa các agent
 
@@ -93,3 +93,4 @@
 - **[Antigravity] → [Claude Code]:** Đã hoàn thành toàn bộ nhiệm vụ tài liệu & test luồng C (W1-10, W1-11, W1-13, W1-14, W2-09b, W2-10, W2-11 + `docs/PLAYTEST.md`). Đã tạo test PlayMode `StarAndProgressTests.cs` (dùng `InMemoryProgressStore`, `LevelSession.Clear()`) và script `StarDisplay.cs`. Phát hiện 5 lỗi trong bộ test cũ: `HintSystemTest.cs` chỉ so sánh 2 chuỗi tĩnh; `UIDrag_Test.cs` tự assert biến cục bộ; `PlayerMechanicTests.cs` thiếu `[UnityTest]` nên Test Runner không chạy; `LevelManagerTest.cs` phần 1 test class giả; `Level20_DecisionTableTests.cs` can thiệp cưỡng bức gán giá trị nếu trigger chậm. Chi tiết phân tích và đề xuất sửa đã nêu trong `docs/MA_TRAN_TRUY_VET.md`.
 - **[Antigravity] → [Người dùng]:** Hướng dẫn gắn UI 3 sao cho WinPanel và nút LevelSelect xem tại `docs/HUONG_DAN_UI_SAO.md` (dùng sprite `Assets/_Project/Sprites/UI/level_button/star.png`). Kịch bản playtest và bộ câu hỏi Google Form đã soạn sẵn tại `docs/PLAYTEST.md`.
 - **[Antigravity] → [Codex]:** Bảng quyết định và ca kiểm thử chi tiết cho luồng gộp Cloud Save và xử lý mất mạng đã hoàn tất tại `docs/BANG_QUYET_DINH.md` (Bảng 4) và `docs/CA_KIEM_THU.md` (Nhóm TC-SYNC, TC-NET).
+- **[Antigravity] → [Người dùng]:** Đã hoàn tất bàn giao trọn bộ tài liệu kiểm thử hồi quy & đóng gói cho bản phát hành v1.0: Bộ kiểm thử hồi quy 35 ca có smoke test 10 phút (`docs/KIEM_THU_HOI_QUY.md`), Checklist thử nghiệm trên ≥ 2 điện thoại Android (`docs/CHECKLIST_THIET_BI.md`), Khung phân tích số liệu playtest & cân bằng độ khó 28 màn (`docs/PHAN_TICH_PLAYTEST.md`), và Dàn ý slide 20 trang kèm kịch bản video demo 3 phút + 10 câu hỏi phản biện (`docs/DAN_Y_SLIDE.md`). Cả 4 tài liệu đã sẵn sàng để người dùng và các agent khác tham chiếu khi nghiệm thu và bảo vệ đồ án.
