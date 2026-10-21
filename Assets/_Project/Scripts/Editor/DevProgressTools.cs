@@ -25,8 +25,7 @@ public static class DevProgressTools
     [MenuItem("Tools/Test/Xóa tiến trình chơi")]
     public static void ResetProgress()
     {
-        LocalProgressStore.DeleteAll();
-        ProgressService.Reload();
+        ProgressService.ResetProgress(); // Tăng resetCount → dữ liệu cũ trên cloud không gộp ngược lại
         LevelSession.Clear();
         Debug.Log("✅ Đã xóa tiến trình và số sao, chỉ còn Level 1 được mở.");
     }

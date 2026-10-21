@@ -18,6 +18,9 @@ public class ProgressData
     public List<LevelStars> stars = new List<LevelStars>();
     public string updatedAtUtc = "";
 
+    /// <summary>Số lần chơi lại từ đầu (New Game). Bên có giá trị lớn hơn là dữ liệu sau lần reset mới nhất.</summary>
+    public int resetCount;
+
     public int GetStars(int levelId)
     {
         if (stars == null) return 0;

@@ -11,6 +11,7 @@ public class LocalProgressStoreTests
     {
         LocalProgressStore.SavedLevelKey, LocalProgressStore.LevelStarsKey, LocalProgressStore.UpdatedAtKey
     };
+    private int? backupResetCount;
 
     private int? backupMaxUnlocked;
     private readonly string[] backupStrings = new string[StringKeys.Length];
@@ -20,6 +21,8 @@ public class LocalProgressStoreTests
     public void Setup()
     {
         backupMaxUnlocked = PlayerPrefs.HasKey(IntKeys[0]) ? PlayerPrefs.GetInt(IntKeys[0]) : (int?)null;
+        backupResetCount = PlayerPrefs.HasKey(LocalProgressStore.ResetCountKey)
+            ? PlayerPrefs.GetInt(LocalProgressStore.ResetCountKey) : (int?)null;
         for (int i = 0; i < StringKeys.Length; i++)
         {
             hadString[i] = PlayerPrefs.HasKey(StringKeys[i]);
@@ -33,6 +36,7 @@ public class LocalProgressStoreTests
     {
         LocalProgressStore.DeleteAll();
         if (backupMaxUnlocked.HasValue) PlayerPrefs.SetInt(IntKeys[0], backupMaxUnlocked.Value);
+        if (backupResetCount.HasValue) PlayerPrefs.SetInt(LocalProgressStore.ResetCountKey, backupResetCount.Value);
         for (int i = 0; i < StringKeys.Length; i++)
         {
             if (hadString[i]) PlayerPrefs.SetString(StringKeys[i], backupStrings[i]);
@@ -53,7 +57,7 @@ public class LocalProgressStoreTests
     [Test]
     public void SaveThenLoad_RoundTripsAllFields()
     {
-        ProgressData saved = new ProgressData { maxUnlockedLevel = 12, savedLevel = "Level 12", updatedAtUtc = "2026-11-01T00:00:00Z" };
+        ProgressData saved = new ProgressData { maxUnlockedLevel = 12, savedLevel = "Level 12", updatedAtUtc = "2026-11-01T00:00:00Z", resetCount = 2 };
         saved.SetStarsIfHigher(1, 3);
         saved.SetStarsIfHigher(5, 2);
 
@@ -65,6 +69,7 @@ public class LocalProgressStoreTests
         Assert.AreEqual("2026-11-01T00:00:00Z", loaded.updatedAtUtc);
         Assert.AreEqual(3, loaded.GetStars(1));
         Assert.AreEqual(2, loaded.GetStars(5));
+        Assert.AreEqual(2, loaded.resetCount);
     }
 
     // Tương thích dữ liệu cũ: người chơi đã có key "MaxUnlockedLevel" từ phiên bản trước

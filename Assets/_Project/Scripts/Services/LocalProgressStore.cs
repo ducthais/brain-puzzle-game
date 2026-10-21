@@ -10,6 +10,7 @@ public class LocalProgressStore : IProgressStore
     public const string SavedLevelKey = "SavedLevel";
     public const string LevelStarsKey = "LevelStars";
     public const string UpdatedAtKey = "ProgressUpdatedAt";
+    public const string ResetCountKey = "ProgressResetCount";
 
     [System.Serializable]
     private class StarsWrapper
@@ -23,7 +24,8 @@ public class LocalProgressStore : IProgressStore
         {
             maxUnlockedLevel = Mathf.Max(1, PlayerPrefs.GetInt(MaxUnlockedLevelKey, 1)),
             savedLevel = PlayerPrefs.GetString(SavedLevelKey, ProgressData.DefaultSavedLevel),
-            updatedAtUtc = PlayerPrefs.GetString(UpdatedAtKey, "")
+            updatedAtUtc = PlayerPrefs.GetString(UpdatedAtKey, ""),
+            resetCount = PlayerPrefs.GetInt(ResetCountKey, 0)
         };
 
         string starsJson = PlayerPrefs.GetString(LevelStarsKey, "");
@@ -51,6 +53,7 @@ public class LocalProgressStore : IProgressStore
         PlayerPrefs.SetString(SavedLevelKey, data.savedLevel ?? ProgressData.DefaultSavedLevel);
         PlayerPrefs.SetString(LevelStarsKey, JsonUtility.ToJson(new StarsWrapper { items = data.stars }));
         PlayerPrefs.SetString(UpdatedAtKey, data.updatedAtUtc ?? "");
+        PlayerPrefs.SetInt(ResetCountKey, data.resetCount);
         PlayerPrefs.Save();
     }
 
@@ -63,6 +66,7 @@ public class LocalProgressStore : IProgressStore
         PlayerPrefs.DeleteKey(SavedLevelKey);
         PlayerPrefs.DeleteKey(LevelStarsKey);
         PlayerPrefs.DeleteKey(UpdatedAtKey);
+        PlayerPrefs.DeleteKey(ResetCountKey);
         PlayerPrefs.Save();
     }
 }

@@ -63,6 +63,36 @@ public class ProgressMergerTests
         Assert.AreEqual(1, ProgressMerger.Merge(null, null).maxUnlockedLevel);
     }
 
+    // New Game ở máy này rồi đồng bộ: tiến trình cũ trên cloud KHÔNG được khôi phục lại
+    [Test]
+    public void Merge_LocalResetNewer_IgnoresOldCloudProgress()
+    {
+        ProgressData local = Make(1, "Level 1", "");
+        local.resetCount = 1;
+        ProgressData cloud = Make(15, "Level 15", "", (3, 3));
+
+        ProgressData result = ProgressMerger.Merge(local, cloud);
+
+        Assert.AreEqual(1, result.maxUnlockedLevel);
+        Assert.AreEqual(0, result.GetStars(3));
+        Assert.AreEqual(1, result.resetCount);
+    }
+
+    // Máy khác đã New Game (cloud reset mới hơn) → bỏ tiến trình cũ ở máy này
+    [Test]
+    public void Merge_CloudResetNewer_TakesCloud()
+    {
+        ProgressData local = Make(12, "Level 12", "", (1, 3));
+        ProgressData cloud = Make(2, "Level 2", "");
+        cloud.resetCount = 2;
+
+        ProgressData result = ProgressMerger.Merge(local, cloud);
+
+        Assert.AreEqual(2, result.maxUnlockedLevel);
+        Assert.AreEqual(0, result.GetStars(1));
+        Assert.AreEqual(2, result.resetCount);
+    }
+
     [Test]
     public void Merge_DoesNotModifyInputs()
     {

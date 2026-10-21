@@ -75,6 +75,19 @@ public class ProgressServiceTests
     }
 
     [Test]
+    public void ResetProgress_IncrementsResetCount_SoOldCloudDataIsNotRestored()
+    {
+        ProgressService.CompleteLevel(1, "Level 2", 3);
+        ProgressData oldCloud = ProgressService.Snapshot;
+
+        ProgressService.ResetProgress();
+        ProgressService.MergeFrom(oldCloud);
+
+        Assert.AreEqual(1, ProgressService.MaxUnlockedLevel);
+        Assert.AreEqual(1, store.Load().resetCount);
+    }
+
+    [Test]
     public void MergeFrom_AppliesCloudProgress()
     {
         ProgressService.CompleteLevel(1, "Level 2", 2);

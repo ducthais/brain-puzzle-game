@@ -59,7 +59,8 @@ public static class ProgressService
     /// <summary>Chơi lại từ đầu: chỉ còn Level 1, xóa sao. Không ảnh hưởng Premium.</summary>
     public static void ResetProgress()
     {
-        data = new ProgressData();
+        int resetCount = Data.resetCount + 1;
+        data = new ProgressData { resetCount = resetCount };
         Commit();
     }
 
