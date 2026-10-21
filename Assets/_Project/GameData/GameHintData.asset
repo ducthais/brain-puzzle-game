@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b56e76603934c264792c2a665d606fe2, type: 3}
+  m_Name: GameHintData
+  m_EditorClassIdentifier: Assembly-CSharp::LevelDatabase
+  allLevels:
+  - levelName: Level 1
+    hintMessage: "H\xE3y k\u1EBFt h\u1EE3p linh ho\u1EA1t gi\u1EEFa n\xFAt di chuy\u1EC3n tr\xE1i, ph\u1EA3i, nh\u1EA3y \u0111\u1EC3 \u0111o\u1EA1t \u0111c l\xE1 c\u1EDD v\xE0ng"
+  - levelName: Level 2
+    hintMessage: "\u0110\u01B0a chi\u1EBFc h\u1ED9p v\xE0o v\u1ECB tr\xED ph\xF9 h\u1EE3p \u0111\u1EC3 leo l\xEAn b\u1EADc cao"
+  - levelName: Level 3
+    hintMessage: "B\u1EA1n h\xE3y t\u01B0\u01A1ng t\xE1c v\u1EDBi h\u1ED9p ! v\xE0 nh\u1EA5n v\xE0o d\xF2ng ch\u1EEF \"QUA M\xC0N\""
+  - levelName: Level 4
+    hintMessage: "H\xE3y k\xE9o m\u1EB7t \u0111\u1EA5t ngay d\u01B0\u1EDBi ch\xE2n th\xF4i"
+  - levelName: Level 5
+    hintMessage: "Th\u1EE9 gi\xFAp b\u1EA1n qua m\xE0n kh\xF4ng n\u1EB1m \u1EDF d\u01B0\u1EDBi \u0111\u1EA5t, m\xE0 n\u1EB1m ngay tr\xEAn ch\xEDnh nh\u1EEFng n\xFAt b\u1EA5m b\u1EA1n \u0111ang d\xF9ng. Th\u1EED ch\u1EA1m v\xE0 gi\u1EEF ch\xFAng xem sao?"
+  - levelName: Level 6
+    hintMessage: "\u0110\u1EADp v\xE0o th\xF9ng kia v\xE0 t\u1EA1o ra con \u0111\u01B0\u1EDDng v\xF4 h\xECnh"
+  - levelName: Level 7
+    hintMessage: "H\xE3y ph\xE1 h\u1EE7y h\u1ED9p v\xE0 b\u1EA5t ng\u1EDD s\u1EBD xu\u1EA5t hi\u1EC7n, cho ph\xE9p kh\u1EA3 n\u0103ng \u0111\u01B0a b\u1EA1n l\xEAn cao"
+  - levelName: Level 8
+    hintMessage: "B\u1EA1n h\xE3y gi\u1EEF nh\xE2n v\u1EADt v\xE0 di chuy\u1EC3n qua c\xE1c ch\u01B0\u1EDBng ngo\u1EA1i v\u1EADt."
+  - levelName: Level 9
+    hintMessage: "V\u1EABn c\xF3 n\xFAt c\xF3 kh\u1EA3 n\u0103ng di chuy\u1EC3n m\xE0,h\xE3y th\u1EED l\u1EA1i xem sao"
+  - levelName: Level 10
+    hintMessage: "B\u1EA1n h\xE3y th\u1EED k\xE9o l\xEAn xu\u1ED1ng c\xE1c kh\u1ED1i \u0111\u1EA5t xem "
+  - levelName: Level 11
+    hintMessage: "H\xE3y d\xF9ng c\xE1ch \u0111\xE3 qua m\xE0n \u0111\u1EC3 th\u1EED xem"
+  - levelName: Level 12
+    hintMessage: "Khi b\u1EA1n nh\u1EA5n reset th\xEC s\u1EBD t\u1EA1o 1 m\u1ED9t nh\xE2n b\u1EA3n, b\u1EA1n h\xE3y d\xF9ng c\xE1c nh\xE2n b\u1EA3n n\xE0y nh\u01B0 1 c\xE2y c\u1EA7u."
+  - levelName: Level 13
+    hintMessage: "H\xE3y d\xF9ng n\xFAt \u0111\u1EC3 t\u1EA1o th\xE0nh 1 c\xE2y c\u1EA7u nh\u01B0 b\u1EA1n \u0111\xE3 l\xE0m tr\u01B0\u1EDBc \u0111\xF3"
+  - levelName: Level 14
+    hintMessage: "L\u1EA1i l\xE0 1 m\xE0n tu t\u1EEB th\xF4i, h\xE3y n\u1EAFm b\u1EAFt l\u1EA5y n\xF3"
+  - levelName: Level 15
+    hintMessage: "Th\u1EE9 gi\xFAp b\u1EA1n qua m\xE0n kh\xF4ng n\u1EB1m \u1EDF d\u01B0\u1EDBi \u0111\u1EA5t, m\xE0 n\u1EB1m ngay tr\xEAn ch\xEDnh nh\u1EEFng n\xFAt b\u1EA5m b\u1EA1n \u0111ang d\xF9ng. Th\u1EED ch\u1EA1m v\xE0 gi\u1EEF ch\xFAng xem sao?"
+  - levelName: Level 16
+    hintMessage: "Th\u1EE9 gi\xFAp b\u1EA1n qua m\xE0n kh\xF4ng n\u1EB1m \u1EDF d\u01B0\u1EDBi \u0111\u1EA5t, m\xE0 n\u1EB1m ngay tr\xEAn ch\xEDnh nh\u1EEFng n\xFAt b\u1EA5m b\u1EA1n \u0111ang d\xF9ng. Th\u1EED ch\u1EA1m v\xE0 gi\u1EEF ch\xFAng xem sao?"
+  - levelName: Level 17
+    hintMessage: "L\xE1 c\u1EDD th\u1EADt \u1EA9n d\u1EA5u xong t\u1EA5m b\u1EA3ng, h\xE3y vu\u1ED1t l\xEAn v\xE0 l\u1EA5y n\xF3"
+  - levelName: Level 18
+    hintMessage: "Kh\xF4ng ch\u1EC9 c\xF3 1 l\u1ED7i tho\xE1t m\xE0 c\xF2n l\xE0 2 l\u1ED1i tho\xE1t c\u01A1, c\xE1c UI c\xF3 kh\u1EA3 n\u0103ng \u0111\xE3 th\u1EED r\u1ED3i th\xEC sao! "
+  - levelName: Level 19
+    hintMessage: "Th\u1EE9 gi\xFAp b\u1EA1n qua m\xE0n kh\xF4ng n\u1EB1m \u1EDF d\u01B0\u1EDBi \u0111\u1EA5t, m\xE0 n\u1EB1m ngay tr\xEAn ch\xEDnh nh\u1EEFng n\xFAt b\u1EA5m b\u1EA1n \u0111ang d\xF9ng. Th\u1EED ch\u1EA1m v\xE0 gi\u1EEF ch\xFAng xem sao?"
+  - levelName: Level 20
+    hintMessage: "Th\u1EE9 gi\xFAp b\u1EA1n qua m\xE0n kh\xF4ng n\u1EB1m \u1EDF d\u01B0\u1EDBi \u0111\u1EA5t, m\xE0 n\u1EB1m ngay tr\xEAn ch\xEDnh nh\u1EEFng n\xFAt b\u1EA5m b\u1EA1n \u0111ang d\xF9ng. Th\u1EED ch\u1EA1m v\xE0 gi\u1EEF ch\xFAng xem sao?"
+  - levelName: Level 21
+    hintMessage: "H\xE3y th\u1EED t\u01B0\u01A1ng t\xE1c v\u1EDBi giao di\u1EC7n xem sao!"

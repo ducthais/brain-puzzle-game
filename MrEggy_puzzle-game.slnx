@@ -1,0 +1,9 @@
+﻿<Solution>
+  <Project Path="LeanCommon.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="MainGameScripts.csproj" />
+  <Project Path="Tests_PlayMode.csproj" />
+  <Project Path="LeanTouch.csproj" />
+  <Project Path="CW.Common.csproj" />
+  <Project Path="MainGameScripts.Editor.csproj" />
+</Solution>

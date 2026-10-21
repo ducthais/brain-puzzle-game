@@ -1,0 +1,55 @@
+# ==========================================
+# THƯ MỤC TẠM THỜI VÀ FILE TỰ SINH CỦA UNITY
+# ==========================================
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Mm]emoryCaptures/
+/[Uu]ser[Ss]ettings/
+
+# Chặn toàn bộ các asset được tải về từ Asset Store
+/[Aa]ssets/AssetStoreTools*
+
+# ==========================================
+# FILE CẤU HÌNH CỦA CÁC TRÌNH BIÊN DỊCH (IDE)
+# ==========================================
+.vs/
+.gradle/
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# File cấu hình của Rider / Visual Studio Code
+.idea/
+.vscode/
+
+# ==========================================
+# FILE HỆ THỐNG CỦA HỆ ĐIỀU HÀNH
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+/Assets/TextMesh Pro/Resources/Fonts & Materials
+UserSettings/Layouts/default-6000.dwlt
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset
