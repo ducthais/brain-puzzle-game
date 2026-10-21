@@ -31,12 +31,12 @@ Khi người chơi chạm đích (hoặc bấm nút "Nhảy" bỏ qua màn), h�
 *Ghi chú ký hiệu:* `C` = Có / Đúng (True); `K` = Không / Sai (False); `—` = Không quan tâm (Don't care); `X` = Hành động được thực thi.
 
 ### 1.3. Ánh xạ mã nguồn và Ca kiểm thử tự động
-- **Mã nguồn thực thi:** [`Assets/_Project/Scripts/Core/StarCalculator.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/Core/StarCalculator.cs)
-- **Kiểm thử tự động EditMode:** [`Assets/_Project/Tests_EditMode/StarCalculatorTests.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Tests_EditMode/StarCalculatorTests.cs)
+- **Mã nguồn thực thi:** [`Assets/_Project/Scripts/Core/StarCalculator.cs`](../Assets/_Project/Scripts/Core/StarCalculator.cs)
+- **Kiểm thử tự động EditMode:** [`Assets/_Project/Tests_EditMode/StarCalculatorTests.cs`](../Assets/_Project/Tests_EditMode/StarCalculatorTests.cs)
   - `Calculate_FollowsDecisionTable` (các test case `R1_ChuaQuaMan_0Sao`, `R2_BoQuaMan_1Sao`, `R3_KhongChet_KhongHint_3Sao`, `R4_KhongChet_CoHint_2Sao`, `R5_CoChet_KhongHint_2Sao`, `R6_CoChet_CoHint_1Sao`).
   - `Calculate_OneDeath_LosesNoDeathStar` (kiểm tra giá trị biên: `deaths = 1` lập tức mất sao).
   - `Calculate_NegativeCounters_TreatedAsZero` (xử lý dữ liệu bất thường: đếm âm xem như 0).
-- **Kiểm thử tự động PlayMode:** [`Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs)
+- **Kiểm thử tự động PlayMode:** [`Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs`](../Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs)
   - `WinGame_PerfectRun_AwardsThreeStars_AndUnlocksNextLevel` (ứng với R3).
   - `WinGame_WithDeath_AwardsTwoStars` (ứng với R5).
   - `OnClickNhay_Canvas2_SkipsLevelWithOneStar` (ứng với R2).
@@ -60,10 +60,10 @@ Khi người chơi bấm vào biểu tượng bóng đèn (Gợi ý) trên HUD m
 | | A2 | Mở thẳng nội dung gợi ý (`hintCanvas2 = True`, `hintCanvas1 = False`) | | **X** | **X** | **X** |
 
 ### 2.3. Ánh xạ mã nguồn và Ca kiểm thử tự động
-- **Mã nguồn thực thi:** [`Assets/_Project/Scripts/Services/HintService.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/Services/HintService.cs)
-- **Kiểm thử tự động EditMode:** [`Assets/_Project/Tests_EditMode/LevelSessionAndNamingTests.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Tests_EditMode/LevelSessionAndNamingTests.cs)
+- **Mã nguồn thực thi:** [`Assets/_Project/Scripts/Services/HintService.cs`](../Assets/_Project/Scripts/Services/HintService.cs)
+- **Kiểm thử tự động EditMode:** [`Assets/_Project/Tests_EditMode/LevelSessionAndNamingTests.cs`](../Assets/_Project/Tests_EditMode/LevelSessionAndNamingTests.cs)
   - Test case: `CanOpenHintDirectly_DecisionTable(bool isPremium, bool unlocked, bool expected)` (kiểm thử vét cạn cả 4 luật R1–R4).
-- **Kiểm thử tự động PlayMode / Tích hợp:** [`Assets/_Project/Tests_EditMode/LevelManagerTest.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Tests_EditMode/LevelManagerTest.cs)
+- **Kiểm thử tự động PlayMode / Tích hợp:** [`Assets/_Project/Tests_EditMode/LevelManagerTest.cs`](../Assets/_Project/Tests_EditMode/LevelManagerTest.cs)
   - `Test_ClickHint_PremiumUser_OpensCanvas2Immediately` (R2).
   - `Test_ClickHint_FreeUser_OpensCanvas1First` (R1).
 
@@ -93,13 +93,13 @@ Khi người chơi chiến thắng màn chơi hiện tại (`levelId`):
 | | A7 | Bắn sự kiện `Changed` và gọi `Store.Save()` | **X** | **X** | **X** | **X** | **X** |
 
 ### 3.3. Ánh xạ mã nguồn và Ca kiểm thử tự động
-- **Mã nguồn thực thi:** [`Assets/_Project/Scripts/Services/ProgressService.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/Services/ProgressService.cs) & [`Assets/_Project/Scripts/Core/ProgressData.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/Core/ProgressData.cs)
-- **Kiểm thử tự động EditMode:** [`Assets/_Project/Tests_EditMode/ProgressServiceTests.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Tests_EditMode/ProgressServiceTests.cs)
+- **Mã nguồn thực thi:** [`Assets/_Project/Scripts/Services/ProgressService.cs`](../Assets/_Project/Scripts/Services/ProgressService.cs) & [`Assets/_Project/Scripts/Core/ProgressData.cs`](../Assets/_Project/Scripts/Core/ProgressData.cs)
+- **Kiểm thử tự động EditMode:** [`Assets/_Project/Tests_EditMode/ProgressServiceTests.cs`](../Assets/_Project/Tests_EditMode/ProgressServiceTests.cs)
   - `CompleteLevel_UnlocksNextLevel_AndSaves` (R1).
   - `ReplayingOldLevel_DoesNotLowerMaxUnlocked` (R3, R4).
   - `CompleteLevel_WithFewerStars_KeepsBestStars` (R4).
   - `Changed_IsRaisedOnEveryCommit` (A7).
-- **Kiểm thử tự động PlayMode:** [`Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs)
+- **Kiểm thử tự động PlayMode:** [`Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs`](../Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs)
   - `WinGame_ReplayingWithFewerStars_DoesNotLowerSavedStars` (R4).
 
 ---
@@ -133,8 +133,8 @@ Khi người chơi chiến thắng màn chơi hiện tại (`levelId`):
 | | A8 | Lấy mốc thời gian muộn hơn | | | **X** | **X** | **X** |
 
 ### 4.3. Ánh xạ mã nguồn và Ca kiểm thử tự động
-- **Mã nguồn thực thi:** [`Assets/_Project/Scripts/Core/ProgressMerger.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/Core/ProgressMerger.cs)
-- **Kiểm thử tự động EditMode:** [`Assets/_Project/Tests_EditMode/ProgressMergerTests.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Tests_EditMode/ProgressMergerTests.cs)
+- **Mã nguồn thực thi:** [`Assets/_Project/Scripts/Core/ProgressMerger.cs`](../Assets/_Project/Scripts/Core/ProgressMerger.cs)
+- **Kiểm thử tự động EditMode:** [`Assets/_Project/Tests_EditMode/ProgressMergerTests.cs`](../Assets/_Project/Tests_EditMode/ProgressMergerTests.cs)
   - `Merge_TakesHigherMaxUnlockedLevel` (R3, R4).
   - `Merge_SavedLevelFollowsSideWithMoreProgress` (R3, R4).
   - `Merge_EqualProgress_KeepsLocalSavedLevel` (R5: kiểm tra luật hòa).
@@ -142,5 +142,5 @@ Khi người chơi chiến thắng màn chơi hiện tại (`levelId`):
   - `Merge_TakesLaterUpdatedAt` (A8: so sánh mốc ISO 8601).
   - `Merge_NullSides_ReturnsCopyOfOther` (R1, R2).
   - `Merge_DoesNotModifyInputs` (tính bất biến của tham số đầu vào).
-- **Kiểm thử tích hợp Service:** [`Assets/_Project/Tests_EditMode/ProgressServiceTests.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Tests_EditMode/ProgressServiceTests.cs)
+- **Kiểm thử tích hợp Service:** [`Assets/_Project/Tests_EditMode/ProgressServiceTests.cs`](../Assets/_Project/Tests_EditMode/ProgressServiceTests.cs)
   - `MergeFrom_AppliesCloudProgress` (kiểm tra `ProgressService` lưu và phát sự kiện sau khi gộp).

@@ -72,7 +72,7 @@ Quy trình kiểm thử được tổ chức theo mô hình Kim tự tháp kiể
 
 1. **Bảng quyết định (Decision Table Testing):**
    - Áp dụng triệt để cho các logic có nhiều điều kiện kết hợp: Luật tính 3 sao kết thúc màn (`StarCalculator`), Điều kiện mở gợi ý trực tiếp không qua Ads (`HintService`), Luật gộp dữ liệu Local/Cloud (`ProgressMerger`).
-   - Chi tiết đã được đặc tả tại tài liệu [`docs/BANG_QUYET_DINH.md`](file:///D:/Repo/MrEggy-antigravity/docs/BANG_QUYET_DINH.md).
+   - Chi tiết đã được đặc tả tại tài liệu [`docs/BANG_QUYET_DINH.md`](BANG_QUYET_DINH.md).
 2. **Phân vùng tương đương (Equivalence Partitioning):**
    - Phân chia miền dữ liệu đầu vào thành các lớp hợp lệ và không hợp lệ:
      - Số lần chết: `{deaths = 0}` (Hợp lệ, có sao), `{deaths > 0}` (Hợp lệ, mất sao), `{deaths < 0}` (Bất thường, ép về 0).
@@ -114,7 +114,7 @@ Quy trình kiểm thử được tổ chức theo mô hình Kim tự tháp kiể
 ### 6.1. Tiêu chí Đạt (Pass Criteria)
 - 100% các bài test tự động trong `Tests_EditMode` và `Tests_PlayMode` chạy thành công (màu xanh).
 - Tỷ lệ bao phủ mã nguồn (Code Coverage) của package lõi `MainGameScripts` đạt tối thiểu **30%** (khuyến khích ≥ 50%).
-- Toàn bộ các ca kiểm thử thủ công mức `High` và `Critical` trong [`docs/CA_KIEM_THU.md`](file:///D:/Repo/MrEggy-antigravity/docs/CA_KIEM_THU.md) đều đạt trạng thái **PASS**.
+- Toàn bộ các ca kiểm thử thủ công mức `High` và `Critical` trong [`docs/CA_KIEM_THU.md`](CA_KIEM_THU.md) đều đạt trạng thái **PASS**.
 - Không có hiện tượng giật lag, tốc độ khung hình trung bình trên thiết bị Android ≥ 30 FPS.
 
 ### 6.2. Tiêu chí Tạm dừng (Suspension Criteria)

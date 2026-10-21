@@ -285,6 +285,9 @@ public class CreateNewLevelTool : EditorWindow
             ((RectTransform)newButton.transform).anchoredPosition = ((RectTransform)source.transform).anchoredPosition;
             SetPersistentIntArgument(newButton, "LoadLevel", levelId);
             SetLabel(newButton.gameObject, levelId.ToString());
+            // Nút copy từ nút cũ → cụm sao (nếu có) phải trỏ sang màn mới
+            foreach (StarDisplay stars in newButton.GetComponentsInChildren<StarDisplay>(true))
+                stars.levelId = levelId;
 
             while (levelButtons.Count < levelId - 1) levelButtons.Add(null);
             if (levelButtons.Count == levelId - 1) levelButtons.Add(newButton);

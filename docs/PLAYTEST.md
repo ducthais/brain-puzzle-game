@@ -3,7 +3,7 @@
 > **Dự án:** Mr. Eggy Puzzle Game — Đồ án chuyên ngành IT6122  
 > **Người thực hiện:** Agent Antigravity (QA Lead)  
 > **Áp dụng cho:** Đợt Playtest Tuần 3 (Mốc W3-09: 06/11 – 09/11)  
-> **Tài liệu tham chiếu:** Mục 9 kế hoạch đồ án ([`docs/KE_HOACH_DO_AN.md`](file:///D:/Repo/MrEggy-antigravity/docs/KE_HOACH_DO_AN.md#9-kế-hoạch-playtest--thu-thập-số-liệu))
+> **Tài liệu tham chiếu:** Mục 9 kế hoạch đồ án ([`docs/KE_HOACH_DO_AN.md`](KE_HOACH_DO_AN.md#9-kế-hoạch-playtest--thu-thập-số-liệu))
 
 ---
 

@@ -4,9 +4,19 @@ Tài liệu hướng dẫn dành cho **Người dùng** thực hiện thao tác 
 
 ---
 
+## ⚡ Cách nhanh: dùng tool Editor (khuyên dùng)
+
+Không cần làm tay các bước ở mục 2–3. Trong Unity (không ở Play mode):
+
+1. **`Tools → UI Sao → Gắn sao vào bảng thắng (mọi màn)`** — thêm `StarsContainer` (3 sao, chế độ `WinPanel`) vào prefab `Assets/_Project/Prefabs/WinCanvas.prefab`, nên **mọi màn** dùng prefab này đều có sao. Mở prefab để chỉnh vị trí nếu cần (mặc định giữa khung nội dung và nút Tiếp tục).
+2. **`Tools → UI Sao → Gắn sao vào nút chọn màn (LevelSelect)`** — thêm cụm `Stars` vào mọi nút trong `LevelSelectManager.levelButtons`, tự đặt `levelId` đúng thứ tự. Chạy lại lệnh này bất cứ lúc nào để sửa `levelId`.
+3. `Tools → Tạo Level mới` tự đặt `levelId` cho cụm sao của nút màn mới.
+
+Các mục dưới đây giữ lại để hiểu cấu trúc hoặc khi muốn dựng tay.
+
 ## 1. Giới thiệu Script `StarDisplay.cs`
 
-Script [`Assets/_Project/Scripts/UI/StarDisplay.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/UI/StarDisplay.cs) là một `MonoBehaviour` linh hoạt quản lý cụm 3 ngôi sao đánh giá thành tích người chơi:
+Script [`Assets/_Project/Scripts/UI/StarDisplay.cs`](../Assets/_Project/Scripts/UI/StarDisplay.cs) là một `MonoBehaviour` linh hoạt quản lý cụm 3 ngôi sao đánh giá thành tích người chơi:
 - **Chế độ `WinPanel`**: Gắn trên bảng chúc mừng chiến thắng (WinPanel / WinCanvas) của màn chơi. Khi bảng hiện lên (`OnEnable`), script tự động truy vấn `LevelManager.LastStars` để làm sáng số sao tương ứng (1, 2 hoặc 3 sao).
 - **Chế độ `LevelSelectButton`**: Gắn trên từng nút chọn màn tại scene `LevelSelect`. Script đọc kỷ lục sao từ `ProgressService.GetStars(levelId)` và tự động cập nhật ngay khi nhận sự kiện `ProgressService.Changed` (ví dụ sau khi đồng bộ Cloud Save).
 

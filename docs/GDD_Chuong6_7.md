@@ -52,7 +52,7 @@ Hai chương mở rộng tiếp nối tinh thần đó:
   2. Người chơi nhảy lên lưng clone 1, nhảy tiếp về phía trước rồi bấm Reset -> Clone thứ 2 xuất hiện ở giữa hố chông.
   3. Lặp lại bước 3 -> Tạo đủ cây cầu bằng 3 thân xác clone.
   4. Người chơi thật ung dung đi trên lưng các clone bước sang bờ bên kia chạm cờ vàng.
-- **Script / Prefab sử dụng:** [`CloneManager.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/CloneManager.cs), `PlayerClone.prefab`, [`PlayerDeath.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/PlayerDeath.cs), `YellowFlag`.
+- **Script / Prefab sử dụng:** [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), `PlayerClone.prefab`, [`PlayerDeath.cs`](../Assets/_Project/Scripts/PlayerDeath.cs), `YellowFlag`.
 - **Nội dung Hint:** *"Thất bại là mẹ thành công, mà nhiều cái xác thì thành cây cầu!"*
 
 ---
@@ -82,7 +82,7 @@ Hai chương mở rộng tiếp nối tinh thần đó:
   2. Tại vị trí đứng trên nút, người chơi kích hoạt kỹ năng tạo bản sao (`CloneManager.CreateCloneAndRespawn`).
   3. Một clone xuất hiện đứng đè vững chắc trên nút bấm. Player thật được dịch chuyển về điểm xuất phát.
   4. Vì clone liên tục đè nút, lá cờ giữ nguyên trạng thái mở khóa. Player thật chỉ việc chạy thẳng đến chạm cờ chiến thắng.
-- **Script / Prefab sử dụng:** [`CloneManager.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/CloneManager.cs), [`PhysicalButton.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/YellowFlag.cs).
+- **Script / Prefab sử dụng:** [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), [`PhysicalButton.cs`](../Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
 - **Nội dung Hint:** *"Một người giữ cửa, một người đi qua. Bạn có dám để lại bản sao của mình?"*
 
 ---
@@ -109,7 +109,7 @@ Hai chương mở rộng tiếp nối tinh thần đó:
   1. Người chơi nhảy lên không trung ngay dưới quỹ đạo rơi của Bẫy 1 -> Kích hoạt tạo Clone giữa không trung.
   2. Bẫy 1 rơi xuống đập trúng đầu Clone và bị kẹt lại trên đầu Clone (Collider chặn nhau), tạo thành một cái mái che vững chắc.
   3. Lặp lại với các bẫy tiếp theo hoặc căn nhịp bẫy đã bị vô hiệu hóa để ung dung bước qua dưới gầm bẫy.
-- **Script / Prefab sử dụng:** [`FallingTrap.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/FallingTrap.cs), [`CloneManager.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/CloneManager.cs), [`YellowFlag.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/YellowFlag.cs).
+- **Script / Prefab sử dụng:** [`FallingTrap.cs`](../Assets/_Project/Scripts/FallingTrap.cs), [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
 - **Nội dung Hint:** *"Đầu đội trời, chân đạp đất, clone đội bẫy chông!"*
 
 ---
@@ -141,7 +141,7 @@ Hai chương mở rộng tiếp nối tinh thần đó:
   2. Đứng lên nút bấm ở tầng đáy mở khóa cờ -> Bấm tạo Clone để Clone ở lại đè nút.
   3. Người chơi respawn về bờ trái -> Vuốt xoay cây cầu `RotatableBridge` tạo thành một con dốc nghiêng 30 độ nối thẳng từ bờ trái lên đỉnh tháp.
   4. Chạy vọt lên con dốc cầu xoay và nhảy thẳng vào lá cờ vàng đã mở khóa trên đỉnh tháp.
-- **Script / Prefab sử dụng:** [`RotatableBridge.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/RotatableBridge.cs), [`CloneManager.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/CloneManager.cs), [`PhysicalButton.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/YellowFlag.cs).
+- **Script / Prefab sử dụng:** [`RotatableBridge.cs`](../Assets/_Project/Scripts/RotatableBridge.cs), [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), [`PhysicalButton.cs`](../Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
 - **Nội dung Hint:** *"Xoay cầu làm dốc, hy sinh bản sao, đỉnh tháp vẫy gọi!"*
 
 ---
@@ -172,7 +172,7 @@ Hai chương mở rộng tiếp nối tinh thần đó:
   2. Sau đó vuốt mạnh đầu bên trái vểnh lên để cây cầu dốc ngược sang phải.
   3. Chiếc hộp đá trượt tự do theo gia tốc trọng lực lao thẳng vào tường chông phía trước, san phẳng chướng ngại vật.
   4. Người chơi xoay cầu trở lại vị trí nằm ngang và thong thả đi qua chạm cờ.
-- **Script / Prefab sử dụng:** [`RotatableBridge.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/RotatableBridge.cs), [`PushableBox.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/PushableBox.cs), `YellowFlag`.
+- **Script / Prefab sử dụng:** [`RotatableBridge.cs`](../Assets/_Project/Scripts/RotatableBridge.cs), [`PushableBox.cs`](../Assets/_Project/Scripts/PushableBox.cs), `YellowFlag`.
 - **Nội dung Hint:** *"Cây cầu không chỉ để đi, nó còn là bệ phóng trượt dốc!"*
 
 ---
@@ -194,14 +194,14 @@ Hai chương mở rộng tiếp nối tinh thần đó:
 +-------------------------------------------------------------+
 ```
 - **Bố cục chi tiết:**
-  - Cờ giả: GameObject mang sprite YellowFlag nhưng gắn component [`FakeWinTrigger.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/FakeWin_Trigger.cs) và bẫy rơi.
-  - Hộp bí ẩn: GameObject gắn [`MysteryBox.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/MysteryBox.cs) hoặc [`MysterySimpleBox.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/MysterySimpleBox.cs).
+  - Cờ giả: GameObject mang sprite YellowFlag nhưng gắn component [`FakeWinTrigger.cs`](../Assets/_Project/Scripts/FakeWin_Trigger.cs) và bẫy rơi.
+  - Hộp bí ẩn: GameObject gắn [`MysteryBox.cs`](../Assets/_Project/Scripts/MysteryBox.cs) hoặc [`MysterySimpleBox.cs`](../Assets/_Project/Scripts/MysterySimpleBox.cs).
 - **Các bước giải (Walkthrough):**
   1. Người chơi phớt lờ lá cờ vàng hào nhoáng ở giữa phòng.
   2. Nhảy qua bệ cờ giả, tiếp cận chiếc hộp bí ẩn `MysteryBox` ở góc phòng.
   3. Dùng đầu cụng từ dưới lên hoặc bấm tương tác vào hộp -> Hộp bung ra và văng ra một lá cờ thật (`YellowFlag.cs`).
   4. Chạm vào lá cờ thật để kích hoạt chiến thắng thực sự của `LevelManager.WinGame()`.
-- **Script / Prefab sử dụng:** [`FakeWin_Trigger.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/FakeWin_Trigger.cs), [`MysteryBox.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/MysteryBox.cs), [`YellowFlag.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/YellowFlag.cs).
+- **Script / Prefab sử dụng:** [`FakeWin_Trigger.cs`](../Assets/_Project/Scripts/FakeWin_Trigger.cs), [`MysteryBox.cs`](../Assets/_Project/Scripts/MysteryBox.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
 - **Nội dung Hint:** *"Thấy vậy mà không phải vậy. Đừng tin vào ánh hoàng kim giả tạo!"*
 
 ---
@@ -223,14 +223,14 @@ Hai chương mở rộng tiếp nối tinh thần đó:
 +-------------------------------------------------------------+
 ```
 - **Bố cục chi tiết:**
-  - Nút Pause: Được gắn script [`DraggableButton.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/DraggableButton.cs) hoặc [`DraggableUIPanel.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/DraggableUIPanel.cs), có `Rigidbody2D` Kinematic khi kéo và chuyển thành Dynamic/Solid khi thả vào thế giới game.
+  - Nút Pause: Được gắn script [`DraggableButton.cs`](../Assets/_Project/Scripts/DraggableButton.cs) hoặc [`DraggableUIPanel.cs`](../Assets/_Project/Scripts/DraggableUIPanel.cs), có `Rigidbody2D` Kinematic khi kéo và chuyển thành Dynamic/Solid khi thả vào thế giới game.
   - Bức tường cao 6 mét, chia cách người chơi và lá cờ vàng.
 - **Các bước giải (Walkthrough):**
   1. Người chơi thử nhảy vào tường nhưng thất bại.
   2. Dùng ngón tay chạm giữ vào nút Pause trên HUD góc trên bên phải màn hình.
   3. Kéo nút Pause thả xuống vị trí lơ lửng sát chân bức tường thành. Nút Pause biến thành một khối tảng đá vật lý vững chắc.
   4. Người chơi nhảy lên nút Pause, rồi từ bề mặt nút Pause lấy đà nhảy vượt qua bức tường cao chạm cờ vàng.
-- **Script / Prefab sử dụng:** [`DraggableButton.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/DraggableButton.cs), [`PlayerController.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/PlayerController.cs), `YellowFlag`.
+- **Script / Prefab sử dụng:** [`DraggableButton.cs`](../Assets/_Project/Scripts/DraggableButton.cs), [`PlayerController.cs`](../Assets/_Project/Scripts/PlayerController.cs), `YellowFlag`.
 - **Nội dung Hint:** *"Nút tạm dừng đâu nhất thiết phải nằm trên góc màn hình?"*
 
 ---
@@ -264,7 +264,7 @@ Hai chương mở rộng tiếp nối tinh thần đó:
   3. **Bước 3 (Bắc cầu):** Gỡ nút Pause trên HUD (`DraggableButton`) đặt vào khoảng trống nối đường lên cầu xoay `RotatableBridge`.
   4. **Bước 4 (Kéo đích về):** Dùng ngón tay kéo thanh đất `DraggableGround` có cắm cờ từ tít góc xa kéo lại gần mép cầu.
   5. **Bước 5 (Về đích):** Nhảy qua nút Pause, chạy qua cầu xoay và bước nhẹ lên bờ đất chạm cờ vàng, hoàn thành toàn bộ 28 màn chơi của trò chơi "Mr. Eggy"!
-- **Script / Prefab sử dụng:** [`CloneManager.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/CloneManager.cs), [`RotatableBridge.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/RotatableBridge.cs), [`DraggableButton.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/DraggableButton.cs), [`DraggableGround.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/DraggableGround.cs), [`FallingTrap.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/FallingTrap.cs), [`PhysicalButton.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](file:///D:/Repo/MrEggy-antigravity/Assets/_Project/Scripts/YellowFlag.cs).
+- **Script / Prefab sử dụng:** [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), [`RotatableBridge.cs`](../Assets/_Project/Scripts/RotatableBridge.cs), [`DraggableButton.cs`](../Assets/_Project/Scripts/DraggableButton.cs), [`DraggableGround.cs`](../Assets/_Project/Scripts/DraggableGround.cs), [`FallingTrap.cs`](../Assets/_Project/Scripts/FallingTrap.cs), [`PhysicalButton.cs`](../Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
 - **Nội dung Hint:** *"Hãy vận dụng tất cả những gì bạn đã học được: Clone, Cầu xoay, Nút UI và Kéo đất!"*
 
 ---

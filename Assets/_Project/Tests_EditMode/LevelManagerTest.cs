@@ -1,90 +1,109 @@
 using NUnit.Framework;
-using System.Collections;
-using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
-using UnityEngine.TestTools;
-using System.Linq;
 
+/// <summary>
+/// Kiểm thử luồng Gợi ý / Nhảy màn của LevelManager (bảng quyết định mục 4.5).
+/// EditMode không chạy Awake() → gán singleton PremiumManager/AdManager bằng reflection
+/// để code thật nhận diện đúng tài khoản Premium/Free.
+/// </summary>
 public class LevelManagerTests
 {
-    // ==========================================================
-    // 1. CODE CŨ CỦA ĐẠI (Test ID Level - Rất an toàn)
-    // ==========================================================
-    public class LevelData
-    {
-        public int Id { get; set; }
-        public bool IsUnlocked { get; set; }
-    }
-
-    [Test]
-    public void GetLevel_WhenLevelIdInvalid_ReturnsNullSafely()
-    {
-        List<LevelData> availableLevels = new List<LevelData>
-        {
-            new LevelData { Id = 1, IsUnlocked = true },
-            new LevelData { Id = 2, IsUnlocked = false }
-        };
-
-        int targetLevelId = 99;
-        var levelResult = availableLevels.FirstOrDefault(lvl => lvl.Id == targetLevelId);
-
-        Assert.IsNull(levelResult, "Hệ thống phải trả về null an toàn khi ID không tồn tại.");
-    }
-
-    // ==========================================================
-    // 2. CODE MỚI MỤC 4.5 (Đã sửa hoàn toàn lỗi gán private set)
-    // ==========================================================
     private GameObject gameObj;
     private LevelManager levelManager;
+    private PremiumManager premiumManager;
+    private bool hadPremiumKey;
+    private int premiumBackup;
+
+    private static void SetInstance<T>(T value) where T : MonoBehaviour
+    {
+        typeof(T).GetProperty("Instance", BindingFlags.Public | BindingFlags.Static)
+            .GetSetMethod(true)
+            .Invoke(null, new object[] { value });
+    }
+
+    private static void SetPremium(bool isPremium)
+    {
+        PlayerPrefs.SetInt("isPremium", isPremium ? 1 : 0);
+    }
 
     [SetUp]
     public void Setup()
     {
+        // Sao lưu Premium thật của Editor để trả lại sau test
+        hadPremiumKey = PlayerPrefs.HasKey("isPremium");
+        premiumBackup = PlayerPrefs.GetInt("isPremium", 0);
+
         // Tiến trình lưu trong bộ nhớ → WinGame() không ghi đè tiến trình thật trong PlayerPrefs
         ProgressService.UseStore(new InMemoryProgressStore());
+        LevelSession.Clear();
 
         gameObj = new GameObject("TestRoot");
         levelManager = gameObj.AddComponent<LevelManager>();
+        levelManager.nextLevelName = "Level 2";
 
         levelManager.hintCanvas1 = new GameObject("HintCanvas1");
         levelManager.hintCanvas2 = new GameObject("HintCanvas2");
+        levelManager.winPanel = new GameObject("WinPanel");
         levelManager.hintCanvas1.SetActive(false);
         levelManager.hintCanvas2.SetActive(false);
+        levelManager.winPanel.SetActive(false);
 
-        if (GameObject.FindObjectOfType<PremiumManager>() == null)
-            new GameObject("PremiumManager").AddComponent<PremiumManager>();
-
-        if (GameObject.FindObjectOfType<AdManager>() == null)
-            new GameObject("AdManager").AddComponent<AdManager>();
+        premiumManager = new GameObject("PremiumManager").AddComponent<PremiumManager>();
+        SetInstance(premiumManager);
+        SetInstance<AdManager>(null);
     }
 
     [TearDown]
     public void Teardown()
     {
+        SetInstance<PremiumManager>(null);
+        AdManager ad = AdManager.Instance;
+        SetInstance<AdManager>(null);
+        if (ad != null) Object.DestroyImmediate(ad.gameObject);
+        if (premiumManager != null) Object.DestroyImmediate(premiumManager.gameObject);
+
+        if (levelManager != null)
+        {
+            Object.DestroyImmediate(levelManager.hintCanvas1);
+            Object.DestroyImmediate(levelManager.hintCanvas2);
+            Object.DestroyImmediate(levelManager.winPanel);
+        }
         if (gameObj != null) Object.DestroyImmediate(gameObj);
-
-        var pm = GameObject.FindObjectOfType<PremiumManager>();
-        if (pm != null) Object.DestroyImmediate(pm.gameObject);
-
-        var am = GameObject.FindObjectOfType<AdManager>();
-        if (am != null) Object.DestroyImmediate(am.gameObject);
 
         Time.timeScale = 1f;
         ProgressService.UseStore(null);
         LevelSession.Clear();
 
-        // Làm sạch bộ nhớ đệm sau khi kết thúc ca test
-        PlayerPrefs.DeleteKey("isPremium");
+        if (hadPremiumKey) PlayerPrefs.SetInt("isPremium", premiumBackup);
+        else PlayerPrefs.DeleteKey("isPremium");
         PlayerPrefs.Save();
     }
 
-    // Test cho TC_BQ_4.5_01: Premium bấm Hint mở thẳng Canvas 2, bỏ qua Ads
+    // ID màn không tồn tại: không mở khóa, không có sao, tên scene sai không parse được, gợi ý dùng mặc định
+    [Test]
+    public void InvalidLevelId_IsHandledSafely()
+    {
+        LevelDatabase emptyDb = ScriptableObject.CreateInstance<LevelDatabase>();
+        try
+        {
+            Assert.IsFalse(ProgressService.IsUnlocked(99));
+            Assert.AreEqual(0, ProgressService.GetStars(99));
+            Assert.IsFalse(LevelNaming.TryParseLevelNumber("Level 0", out _));
+            Assert.IsFalse(LevelNaming.TryParseLevelNumber("LevelSelect", out _));
+            Assert.AreEqual(HintService.DefaultHint, HintService.GetHint(emptyDb, "Level 99"));
+        }
+        finally
+        {
+            Object.DestroyImmediate(emptyDb);
+        }
+    }
+
+    // TC_BQ_4.5_01: Premium bấm Hint mở thẳng Canvas 2, bỏ qua Ads
     [Test]
     public void Test_ClickHint_PremiumUser_OpensCanvas2Immediately()
     {
-        // Thay thế việc gán trực tiếp bằng cách can thiệp vào PlayerPrefs đúng cơ chế của game
-        PlayerPrefs.SetInt("isPremium", 1);
-        PlayerPrefs.Save();
+        SetPremium(true);
 
         levelManager.OnClickHintButton();
 
@@ -92,51 +111,63 @@ public class LevelManagerTests
         Assert.IsFalse(levelManager.hintCanvas1.activeSelf, "Lỗi: Premium lại hiển thị bảng hỏi Ads!");
     }
 
-    // Test cho TC_BQ_4.5_02 & 03: Free bấm Hint bắt buộc phải hiện Canvas 1 hỏi xem Ads
+    // TC_BQ_4.5_02 & 03: Free bấm Hint phải hiện Canvas 1 hỏi xem Ads và dừng game
     [Test]
     public void Test_ClickHint_FreeUser_OpensCanvas1First()
     {
-        // Gán bằng 0 để cấu hình tài khoản Free thường
-        PlayerPrefs.SetInt("isPremium", 0);
-        PlayerPrefs.Save();
+        SetPremium(false);
 
         levelManager.OnClickHintButton();
 
         Assert.IsTrue(levelManager.hintCanvas1.activeSelf, "Lỗi: Người chơi Free không hiển thị bảng hỏi xem Ads!");
         Assert.IsFalse(levelManager.hintCanvas2.activeSelf, "Lỗi: Người chơi Free lại xem được trực tiếp gợi ý!");
+        Assert.AreEqual(0f, Time.timeScale, "Lỗi: Mở bảng gợi ý mà game không tạm dừng!");
     }
 
-    // Test cho TC_BQ_4.5_04: Premium bấm nút "Nhảy" qua màn ngay lập tức
+    // Free đã mở khóa gợi ý ở màn này (bấm "Có") → lần bấm Hint sau mở thẳng Canvas 2
+    [Test]
+    public void Test_FreeUser_AfterUnlockingHint_OpensCanvas2Directly()
+    {
+        SetPremium(false);
+
+        levelManager.OnClickHintButton();
+        levelManager.OnClickCo_Canvas1(); // Không có AdManager → mở khóa ngay
+        Assert.IsTrue(levelManager.hintCanvas2.activeSelf, "Lỗi: Bấm Có mà không mở bảng gợi ý!");
+
+        levelManager.CloseHintCanvas2();
+        levelManager.OnClickHintButton();
+
+        Assert.IsTrue(levelManager.hintCanvas2.activeSelf, "Lỗi: Đã mở khóa gợi ý nhưng vẫn phải xem lại quảng cáo!");
+        Assert.IsFalse(levelManager.hintCanvas1.activeSelf);
+    }
+
+    // TC_BQ_4.5_04: Premium bấm "Nhảy" qua màn ngay, chỉ được 1 sao, mở khóa màn sau
     [Test]
     public void Test_ClickNhay_PremiumUser_WinsGameImmediately()
     {
-        // Khởi tạo thêm winPanel ảo để kiểm tra chính xác tính năng hiện bảng chiến thắng
-        levelManager.winPanel = new GameObject("WinPanel");
-        levelManager.winPanel.SetActive(false);
-
-        PlayerPrefs.SetInt("isPremium", 1);
-        PlayerPrefs.Save();
+        SetPremium(true);
+        SetInstance(new GameObject("AdManager").AddComponent<AdManager>());
         levelManager.hintCanvas2.SetActive(true);
 
         levelManager.OnClickNhay_Canvas2();
 
         Assert.IsFalse(levelManager.hintCanvas2.activeSelf, "Lỗi: Bảng Canvas 2 chưa đóng sau khi bấm Nhảy!");
         Assert.IsTrue(levelManager.winPanel.activeSelf, "Lỗi: Hệ thống chưa kích hoạt WinPanel hiển thị cho Premium!");
-
-        // SỬA TẠI ĐÂY: Khi hiện bảng Win, hệ thống game bắt buộc phải đóng băng timeScale = 0f
         Assert.AreEqual(0f, Time.timeScale, "Lỗi: Khi hiện bảng Win thì hệ thống phải đóng băng game (timeScale = 0)!");
+        Assert.AreEqual(1, levelManager.LastStars, "Lỗi: Nhảy màn phải chỉ được 1 sao!");
+        Assert.IsTrue(ProgressService.IsUnlocked(2), "Lỗi: Nhảy màn không mở khóa màn kế tiếp!");
     }
 
-    // Test cho TC_BQ_4.5_05: Free bấm nút "Nhảy" phải kích hoạt đóng băng game để chạy phễu Ads
+    // TC_BQ_4.5_05: Free bấm "Nhảy" khi không có AdManager → vẫn qua màn (dự phòng), không kẹt game
     [Test]
-    public void Test_ClickNhay_FreeUser_FreezesTimeScaleForAds()
+    public void Test_ClickNhay_FreeUser_WithoutAdManager_StillSkipsLevel()
     {
-        PlayerPrefs.SetInt("isPremium", 0);
-        PlayerPrefs.Save();
+        SetPremium(false);
         levelManager.hintCanvas2.SetActive(true);
 
         levelManager.OnClickNhay_Canvas2();
 
-        Assert.AreEqual(0f, Time.timeScale, "Lỗi: Tài khoản Free bấm Nhảy mà hệ thống không chặn game lại để phát Ads!");
+        Assert.IsTrue(levelManager.winPanel.activeSelf, "Lỗi: Thiếu AdManager làm người chơi kẹt, không qua được màn!");
+        Assert.AreEqual(1, levelManager.LastStars);
     }
 }
