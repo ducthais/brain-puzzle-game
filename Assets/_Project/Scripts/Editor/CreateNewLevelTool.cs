@@ -196,7 +196,7 @@ public class CreateNewLevelTool : EditorWindow
     private static void SetNextLevelName(string scenePath, string nextLevelName)
     {
         var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
-        LevelManager levelManager = Object.FindFirstObjectByType<LevelManager>(FindObjectsInactive.Include);
+        LevelManager levelManager = Object.FindAnyObjectByType<LevelManager>(FindObjectsInactive.Include);
         if (levelManager == null)
         {
             Debug.LogWarning($"⚠ Không tìm thấy LevelManager trong {scenePath}, bỏ qua nextLevelName.");
@@ -245,7 +245,7 @@ public class CreateNewLevelTool : EditorWindow
     private void AddLevelSelectButtons(List<int> levelIds)
     {
         var scene = EditorSceneManager.OpenScene(LevelSelectScenePath, OpenSceneMode.Single);
-        LevelSelectManager manager = Object.FindFirstObjectByType<LevelSelectManager>(FindObjectsInactive.Include);
+        LevelSelectManager manager = Object.FindAnyObjectByType<LevelSelectManager>(FindObjectsInactive.Include);
         if (manager == null)
         {
             Debug.LogError("❌ Không tìm thấy LevelSelectManager trong LevelSelect.");
@@ -352,7 +352,7 @@ public class CreateNewLevelTool : EditorWindow
         if (scene.path != LevelSelectScenePath)
             scene = EditorSceneManager.OpenScene(LevelSelectScenePath, OpenSceneMode.Single);
 
-        LevelSelectManager manager = Object.FindFirstObjectByType<LevelSelectManager>(FindObjectsInactive.Include);
+        LevelSelectManager manager = Object.FindAnyObjectByType<LevelSelectManager>(FindObjectsInactive.Include);
         if (manager == null || manager.chapterButtons == null || manager.chapterButtons.Length == 0)
         {
             Debug.LogError("❌ Không tìm thấy LevelSelectManager hoặc nút Chương.");

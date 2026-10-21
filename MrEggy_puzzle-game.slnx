@@ -4,6 +4,9 @@
   <Project Path="MainGameScripts.csproj" />
   <Project Path="Tests_PlayMode.csproj" />
   <Project Path="LeanTouch.csproj" />
+  <Project Path="MainGameScripts.Online.Tests.csproj" />
   <Project Path="CW.Common.csproj" />
   <Project Path="MainGameScripts.Editor.csproj" />
+  <Project Path="Tests_EditMode.csproj" />
+  <Project Path="MainGameScripts.Online.csproj" />
 </Solution>

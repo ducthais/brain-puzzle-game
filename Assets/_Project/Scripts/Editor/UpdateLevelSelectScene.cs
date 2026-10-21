@@ -58,7 +58,7 @@ public class UpdateLevelSelectScene
         bool hasChanges = false;
 
         // 1. Cập nhật LevelSelectManager (Sử dụng API mới)
-        LevelSelectManager manager = Object.FindFirstObjectByType<LevelSelectManager>();
+        LevelSelectManager manager = Object.FindAnyObjectByType<LevelSelectManager>();
         if (manager != null)
         {
             manager.greenUnlocked = green;
