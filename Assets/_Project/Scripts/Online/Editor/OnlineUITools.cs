@@ -45,8 +45,8 @@ public static class OnlineUITools
         serialized.ApplyModifiedProperties();
         Button open = ButtonAt("OpenLeaderboard", root.transform, "Xếp hạng", Vector2.zero, controller.Show);
         RectTransform openRect = (RectTransform)open.transform;
-        openRect.anchorMin = openRect.anchorMax = new Vector2(1, 0);
-        openRect.anchoredPosition = new Vector2(-145, 55);
+        openRect.anchorMin = openRect.anchorMax = new Vector2(0, 0);
+        openRect.anchoredPosition = new Vector2(420, 55); // Cạnh nút giỏ hàng, không che huy hiệu/sao của màn
         panel.SetActive(false);
         Finish(root, group);
     }

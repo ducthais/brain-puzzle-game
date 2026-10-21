@@ -22,7 +22,7 @@ public static class StarDisplaySetupTool
     private const float WinStarSize = 70f;
     private const float WinStarSpacing = 18f;
 
-    // Sao trên nút chọn màn: nằm sát mép dưới nút, cạnh sao = 28% chiều cao nút
+    // Sao trên nút chọn màn: nằm ngay dưới huy hiệu, cạnh sao = 28% chiều cao nút
     private const float ButtonStarRatio = 0.28f;
     private const float ButtonStarSpacing = 4f;
 
@@ -100,8 +100,8 @@ public static class StarDisplaySetupTool
                 display = CreateStarGroup(button.transform, ButtonStarsName, size, ButtonStarSpacing, star);
                 RectTransform rect = (RectTransform)display.transform;
                 rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
-                rect.pivot = new Vector2(0.5f, 0f);
-                rect.anchoredPosition = new Vector2(0f, size * 0.25f);
+                rect.pivot = new Vector2(0.5f, 1f);
+                rect.anchoredPosition = Vector2.zero;
                 created++;
             }
             else
