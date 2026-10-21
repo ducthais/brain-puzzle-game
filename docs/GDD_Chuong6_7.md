@@ -2,270 +2,168 @@
 ## TÀI LIỆU THIẾT KẾ MÀN CHƠI MỞ RỘNG (LEVEL 21 – LEVEL 28)
 
 > **Dự án:** Mr. Eggy Puzzle Game — Đồ án chuyên ngành IT6122  
-> **Nhiệm vụ:** Task W1-10 (Agent Antigravity phụ trách)  
-> **Nguyên tắc thiết kế tối thượng:** CHỈ sử dụng các cơ chế và component C# đã có sẵn trong `Assets/_Project/Scripts/`. Không phát sinh script cơ chế mới ngoài tầm kiểm soát.
+> **Nhiệm vụ:** W1-10 (bản ý tưởng — Antigravity) → W1-12, W2-08, W3-07 (dựng màn — Claude, bản này)  
+> **Nguyên tắc thiết kế:** Ưu tiên cơ chế có sẵn trong `Assets/_Project/Scripts/`. Chỉ thêm 2 script nhỏ: `PressurePlate` (công tắc sàn) và `ProximityActivator` (vùng kích hoạt bẫy).  
+> **Cách dựng:** cả 8 màn được dựng bằng tool `Tools → Dựng màn → Chương 6–7 (Level 21–28)` ([`Chapter67LevelBuilder.cs`](../Assets/_Project/Scripts/Editor/Chapter67LevelBuilder.cs)). Muốn chỉnh màn → sửa số trong tool rồi chạy lại; không sửa tay trong scene (chạy lại tool sẽ ghi đè).  
+> **Kiểm chứng:** [`Chapter67WalkthroughTests.cs`](../Assets/_Project/Tests_PlayMode/Chapter67WalkthroughTests.cs) — mỗi màn có 1 test chơi theo đúng lời giải (phải thắng) và 1 test chơi "theo bản năng" (không được thắng / phải chết).
+
+> **Thay đổi so với bản ý tưởng W1-10:** bản cũ dựa trên một số giả định không khớp code thật — `PhysicalButton` là nút bấm trên HUD chứ không phải công tắc sàn; chết thì nạp lại scene chứ không để lại xác; `FallingTrap` rơi ngay khi vào màn; nút Pause không kéo được. Bản này thiết kế lại 8 màn cho khớp code.
 
 ---
 
 ## 1. Giới thiệu tổng quan 2 Chương mở rộng
 
-Trò chơi "Mr. Eggy" thu hút người chơi nhờ phong cách giải đố phi quy ước (thinking outside the box), đánh lừa trực giác và tạo ra những tiếng cười sảng khoái khi phát hiện ra mánh khóe ("troll"). 
-Hai chương mở rộng tiếp nối tinh thần đó:
-
 ```
 [Hành trình 28 màn chơi]
 ├── Chương 1-5 (Level 1–20): Làm quen, Nhảy vô hạn, Kéo đất, Hộp vật lý, Bẫy troll cơ bản.
-├── Chương 6 (Level 21–24): "Ảo Ảnh Song Trùng & Thân Xác Thí Mạng" (Clone Mechanics).
-└── Chương 7 (Level 25–28): "Bẻ Cong Thứ Nguyên & Phá Vỡ Bức Tường Thứ Tư" (Reality & UI Breaker).
+├── Chương 6 (Level 21–24): "Ảo Ảnh Song Trùng" — bản sao (Clone).
+└── Chương 7 (Level 25–28): "Bẻ Cong Thứ Nguyên" — kéo thả vật thể & bẫy thị giác.
 ```
 
-- **Chương 6 (Level 21–24) — Cơ chế chủ đạo: Nhân bản & Thân xác thế mạng (`CloneManager.cs`).** Biến cái chết hoặc lệnh reset trở thành một công cụ giải đố. Người chơi phải chủ động hy sinh các phiên bản của chính mình để tạo bậc thang, làm khiên chắn hoặc đè nút công tắc.
-- **Chương 7 (Level 25–28) — Cơ chế chủ đạo: Cầu xoay trọng lực (`RotatableBridge.cs`) & Tương tác phá vỡ UI (`DraggableButton.cs`, `FakeWin_Trigger.cs`).** Bẻ gãy các quy tắc giao diện người dùng, biến các phần tử HUD thành đồ chơi vật lý và đối mặt với những cái bẫy chiến thắng giả mạo.
+### 1.1. Các cơ chế dùng trong 2 chương
+
+| Cơ chế | Script | Hoạt động |
+|---|---|---|
+| **Bản sao** | [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs) + `PlayerClone.prefab` | Ở Chương 6, nút **⟳** trên HUD không chơi lại mà gọi `CreateCloneAndRespawn()`: để lại một bản sao đứng yên (Rigidbody Static, tag `Player`) đúng chỗ nhân vật — kể cả khi đang nhảy giữa không trung — rồi đưa nhân vật về điểm xuất phát. Bản sao là vật rắn: đứng lên được, đỡ được vật rơi, giữ được công tắc. |
+| **Công tắc sàn** (mới) | [`PressurePlate.cs`](../Assets/_Project/Scripts/PressurePlate.cs) | Mỗi bước vật lý dò `OverlapBoxAll` phía trên công tắc; có vật tag `Player` (nhân vật, bản sao) hoặc `PushableBox` đè lên thì *bật*: ẩn các object trong `hideWhilePressed` (cửa, biểu tượng khóa), mở khóa các `YellowFlag` trong `flagsToUnlock`, đổi sprite. Rời đi → trở lại như cũ. Dò bằng overlap vì bản sao là Static, không sinh sự kiện va chạm. |
+| **Vùng kích hoạt** (mới) | [`ProximityActivator.cs`](../Assets/_Project/Scripts/ProximityActivator.cs) | Có `Player` đi vào vùng thì bật các object/component đích. Dùng để treo sẵn `FallingTrap` (đang tắt) trên trần; bước vào vùng thì bẫy mới rơi. |
+| **Bẫy rơi** | [`FallingTrap.cs`](../Assets/_Project/Scripts/FallingTrap.cs) | Rơi với `fallSpeed`, chạm vật không phải nhân vật/bẫy thì dừng (bị đỡ lại). Tag `Trap` → chạm là chết. |
+| **Cầu xoay** | [`RotatableBridge.cs`](../Assets/_Project/Scripts/RotatableBridge.cs) | Chạm vào cầu rồi kéo lên/xuống để xoay, giới hạn bởi `maxTiltAngle`. |
+| **Vật kéo được** | [`DraggableGround.cs`](../Assets/_Project/Scripts/DraggableGround.cs) | Chạm rồi kéo vật đi khắp màn hình (`lockYAxis = false`). |
+| **Hộp đẩy** | prefab `block_planks` (tag `PushableBox`) | Hộp vật lý; nhân vật đi vào là đẩy được. |
+| **Ảo ảnh** | Tilemap không có collider; cờ giả không có `YellowFlag` | Trông như mặt đất / lá cờ thật nhưng không đứng được / không thắng được. |
+
+Thông số vật lý dùng khi thiết kế (từ `PlayerController`: speed 5, jumpForce 12, gravityScale 2.5): **nhảy cao ≈ 2.94**, **nhảy xa trên mặt phẳng ≈ 4.9**, collider nhân vật cao ≈ 0.8. Một ô đất cao ≈ 1.17, rộng ≈ 1.21. Mỗi màn nằm gọn trong một khung hình (camera size 5); nhân vật xuất phát trong vùng an toàn của màn hình 4:3 (`PlayerDeath` giết khi nhân vật ra khỏi viewport).
+
+Chữ trên HUD (`HintTextNormal`) là **câu đố** của màn; nút 💡 là **gợi ý** (`GameHintData`).
 
 ---
 
-## 2. Thiết kế chi tiết Chương 6: "Ảo Ảnh Song Trùng" (Level 21 – Level 24)
+## 2. Chương 6: "Ảo Ảnh Song Trùng" (Level 21 – Level 24)
 
-### Level 21: Bậc Thang Thân Xác (The Human Ladder)
-- **Độ khó dự kiến:** `2/5` (Màn nhập môn cơ chế nhân bản).
-- **Ý tưởng "troll" & Tâm lý người chơi:** Trước mặt là một hố chông tử thần cực rộng, nhảy cỡ nào cũng rơi xuống hố chết. Người chơi theo thói quen sẽ cố tìm cách nhảy xa hơn hoặc tìm đường vòng. Nhưng bí mật là: mỗi lần chết/reset, một xác bản sao (`PlayerClone`) sẽ hóa đá nằm lại ngay vị trí đó.
-- **Sơ đồ bố cục (ASCII Map):**
-```
-+-------------------------------------------------------------+
-|                                                             |
-|   [P]                                                  [FLAG]|
-|  ====                                                 ======|
-|      \                                               /      |
-|       |     # # # # # # # # # # # # # # # # # #     |       |
-|       |     # # # [CHÔNG TỬ THẦN - TRAP]  # # #     |       |
-|       +---------------------------------------------+       |
-|             (Cần 3 xác clone để làm cầu bắc qua)            |
-+-------------------------------------------------------------+
-```
-- **Bố cục chi tiết:**
-  - Vị trí Player [P]: Đứng trên mỏm đá bên trái `(x: -6, y: 0)`.
-  - Hố chông: Tag `Trap`, chiều rộng 8 mét, rơi xuống chạm vào là chết ngay.
-  - Cờ đích [FLAG]: Đứng trên mỏm đá bên phải `(x: 6, y: 0)`.
-  - Bộ quản lý: GameObject chứa `CloneManager` nối với nút Reset trên HUD.
-- **Các bước giải (Walkthrough):**
-  1. Người chơi bước xuống hố chông lần 1 -> Bấm Reset -> Một clone hóa đá xuất hiện ngay mép chông.
-  2. Người chơi nhảy lên lưng clone 1, nhảy tiếp về phía trước rồi bấm Reset -> Clone thứ 2 xuất hiện ở giữa hố chông.
-  3. Lặp lại bước 3 -> Tạo đủ cây cầu bằng 3 thân xác clone.
-  4. Người chơi thật ung dung đi trên lưng các clone bước sang bờ bên kia chạm cờ vàng.
-- **Script / Prefab sử dụng:** [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), `PlayerClone.prefab`, [`PlayerDeath.cs`](../Assets/_Project/Scripts/PlayerDeath.cs), `YellowFlag`.
-- **Nội dung Hint:** *"Thất bại là mẹ thành công, mà nhiều cái xác thì thành cây cầu!"*
+Chủ đề: nút **⟳** biến thành nút *tạo bản sao*. Người chơi phải nhận ra "chơi lại" là một công cụ, rồi dùng bản sao lần lượt làm bậc thang → người giữ cửa → cột chống trần → phối hợp hai bản sao.
 
----
+### Level 21: Bậc Thang Thân Xác
+- **Câu đố HUD:** *"Bức tường quá cao để nhảy lên"* · **Độ khó:** 2/5 (nhập môn bản sao)
+- **Bố cục:**
+```
+                                    [CỜ]
+                         ████████████████
+                         ████████████████   ← tường 3 ô ≈ 3.5 > nhảy cao 2.94
+  [P]                    ████████████████
+ ████████████████████████████████████████████
+```
+  - Nhân vật x = −6.5; tường/tháp từ x = 1.8 đến hết màn, cao 3 ô; cờ x = 6.5 trên đỉnh tháp.
+- **Lời giải:** đi tới chân tường → bấm ⟳ (bản sao cao ≈ 0.8 đứng lại) → đi lại chân tường, nhảy lên bản sao rồi nhảy lên tháp (0.8 + 2.94 > 3.5) → chạm cờ.
+- **Chơi theo bản năng:** nhảy không tới đỉnh, kẹt ở chân tường.
+- **Gợi ý 💡:** *"Nút ⟳ ở màn này không chơi lại mà để lại một bản sao đứng yên tại chỗ. Bản sao cũng là bậc thang!"*
+- **Test:** `Level21_CloneAtWallFoot_BecomesStep`, `Level21_WithoutClone_CannotClimbWall`.
 
-### Level 22: Người Anh Em Nặng Ký (The Heavy Twin)
-- **Độ khó dự kiến:** `3/5`.
-- **Ý tưởng "troll" & Tâm lý người chơi:** Lá cờ vàng nằm ngay trước mắt nhưng lại có xích khóa (`YellowFlag.isLocked = true`). Cách đó một đoạn có một nút bấm vật lý (`PhysicalButton`). Khi người chơi giẫm lên nút thì cờ mở khóa, nhưng vừa bước chân rời nút để chạy lại cờ thì cờ lập tức khóa lại!
-- **Sơ đồ bố cục (ASCII Map):**
+### Level 22: Người Giữ Cửa
+- **Câu đố HUD:** *"Cửa chỉ mở khi có người đứng trên công tắc"* · **Độ khó:** 3/5
+- **Bố cục:**
 ```
-+-------------------------------------------------------------+
-|                                                             |
-|   [P]                                                       |
-|  ======                                                     |
-|       |             [CÔNG TẮC]             [CỜ KHÓA]        |
-|       |             (PHYSICAL)             (LOCKED)         |
-|       |             +--------+             +-------+        |
-|       |             | BUTTON |             | FLAG  |        |
-|  =========================================================  |
-+-------------------------------------------------------------+
+                           ██████████████████████  ← trần phủ cả phía trên cửa
+                              ║
+  [P]        [CÔNG TẮC]       ║ CỬA            [CỜ]
+ ██████████████████████████████████████████████████
 ```
-- **Bố cục chi tiết:**
-  - Vị trí Player: `(x: -5, y: 1)`.
-  - Nút bấm `PhysicalButton`: Tọa độ `(x: 0, y: -1)`, có lò xo đàn hồi. Khi có vật thể đè lên thì gọi `flag.UnlockFlag()`.
-  - Cờ đích `YellowFlag`: Tọa độ `(x: 5, y: -1)`, mặc định `isLocked = true`.
-- **Các bước giải (Walkthrough):**
-  1. Người chơi chạy đến đứng lên nút bấm `PhysicalButton` -> Cờ phát sáng mở khóa.
-  2. Tại vị trí đứng trên nút, người chơi kích hoạt kỹ năng tạo bản sao (`CloneManager.CreateCloneAndRespawn`).
-  3. Một clone xuất hiện đứng đè vững chắc trên nút bấm. Player thật được dịch chuyển về điểm xuất phát.
-  4. Vì clone liên tục đè nút, lá cờ giữ nguyên trạng thái mở khóa. Player thật chỉ việc chạy thẳng đến chạm cờ chiến thắng.
-- **Script / Prefab sử dụng:** [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), [`PhysicalButton.cs`](../Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
-- **Nội dung Hint:** *"Một người giữ cửa, một người đi qua. Bạn có dám để lại bản sao của mình?"*
+  - Nhân vật x = −7; công tắc `PressurePlate` x = −2.5; cửa (cột ván gỗ) x = 3.9, nối từ sàn lên trần; trần 1 ô từ x = 3.2 trở đi; cờ x = 7.
+- **Lời giải:** đứng lên công tắc → cửa biến mất → bấm ⟳ (bản sao ở lại giữ công tắc, nhân vật về đầu màn) → đi thẳng qua cửa đang mở → chạm cờ.
+- **Chơi theo bản năng:** bước khỏi công tắc là cửa đóng lại; trần phủ phía trên cửa nên chồng bản sao để trèo qua cũng không lọt.
+- **Gợi ý 💡:** *"Một người giữ cửa, một người đi qua. Đứng trên công tắc rồi bấm ⟳."*
+- **Test:** `Level22_CloneHoldsPlate_DoorStaysOpen`, `Level22_DoorBlocksWithoutHelper`.
 
----
+### Level 23: Cột Chống Trần
+- **Câu đố HUD:** *"Trần nhà hơi bất ổn..."* · **Độ khó:** 3/5
+- **Bố cục:**
+```
+             ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼  ← tấm chông treo (FallingTrap đang tắt)
+                 ┊ vùng kích hoạt ┊
+  [P]            ┊                ┊          [CỜ]
+ ██████████████████████████████████████████████████
+```
+  - Tấm chông "TamChong" x ∈ [−1.3; 4.6], treo cao; vùng kích hoạt `ProximityActivator` x ∈ [0.3; 4.6] — mép trái tấm chông thò ra ngoài vùng. Cờ x = 7.
+- **Lời giải:** đứng dưới mép trái tấm chông (x ≈ −0.9, còn ngoài vùng) → nhảy lên, gần đỉnh thì bấm ⟳ → bản sao lơ lửng giữa không trung → đi qua vùng: tấm chông rơi, bị bản sao đỡ lại ở độ cao an toàn → đi bên dưới tới cờ.
+- **Chơi theo bản năng:** bước vào vùng, tấm chông rơi trúng đầu → chết, chơi lại.
+- **Gợi ý 💡:** *"Nhảy lên ngay dưới mép trái tấm chông rồi bấm ⟳: bản sao giữa không trung sẽ thành cột chống trần."*
+- **Test:** `Level23_MidAirClone_HoldsUpFallingSlab`, `Level23_WalkingStraight_IsCrushed`.
 
-### Level 23: Cơn Mưa Bẫy Rơi & Khiên Chắn Thịt (Falling Meat-Shield)
-- **Độ khó dự kiến:** `3/5`.
-- **Ý tưởng "troll" & Tâm lý người chơi:** Một hành lang hẹp dẫn tới cờ. Ngay phía trên trần nhà là 3 bẫy chông sắt `FallingTrap` chực chờ rơi tự do xuống với vận tốc khủng khiếp khi người chơi đi ngang qua. Tốc độ di chuyển của nhân vật không thể nào chạy thoát trước khi bẫy sập.
-- **Sơ đồ bố cục (ASCII Map):**
+### Level 24: Cờ Bị Khóa (màn kết Chương 6)
+- **Câu đố HUD:** *"Lá cờ trên tháp đang bị khóa"* · **Độ khó:** 4/5
+- **Bố cục:**
 ```
-+-------------------------------------------------------------+
-|        [BẪY 1]            [BẪY 2]            [BẪY 3]        |
-|        |FALL |            |FALL |            |FALL |        |
-|        V TRAPV            V TRAPV            V TRAPV        |
-|                                                             |
-|   [P]                                                  [FLAG]|
-|  ========================================================== |
-|  (Tạo clone trên không để hứng bẫy rơi làm ô dù che chở)    |
-+-------------------------------------------------------------+
+                                         [!] [CỜ]  ← biểu tượng khóa
+                                  ███████████████
+  [P]     [CÔNG TẮC]              ███████████████   ← tháp 3 ô
+ ██████████████████        ███████████████████████
+                   ▲▲▲▲▲▲▲  (hố chông ≈ 2.4)
 ```
-- **Bố cục chi tiết:**
-  - Các bẫy rơi `FallingTrap`: Đặt tại các tọa độ `x = -2, 1, 4` trên trần cao `y = 4`. Script `FallingTrap` có `fallSpeed = 10f`.
-  - Cờ đích: Đặt ở cuối hành lang `x = 6`.
-- **Các bước giải (Walkthrough):**
-  1. Người chơi nhảy lên không trung ngay dưới quỹ đạo rơi của Bẫy 1 -> Kích hoạt tạo Clone giữa không trung.
-  2. Bẫy 1 rơi xuống đập trúng đầu Clone và bị kẹt lại trên đầu Clone (Collider chặn nhau), tạo thành một cái mái che vững chắc.
-  3. Lặp lại với các bẫy tiếp theo hoặc căn nhịp bẫy đã bị vô hiệu hóa để ung dung bước qua dưới gầm bẫy.
-- **Script / Prefab sử dụng:** [`FallingTrap.cs`](../Assets/_Project/Scripts/FallingTrap.cs), [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
-- **Nội dung Hint:** *"Đầu đội trời, chân đạp đất, clone đội bẫy chông!"*
+  - Nhân vật x = −7.5; công tắc x = −5 (mở khóa cờ, ẩn biểu tượng "!"); hố chông giữa x ≈ −1.6 … 1.6; tháp 3 ô từ x = 4.2; cờ x = 7.2 trên tháp (`YellowFlag.isLocked` = true khi công tắc chưa bị đè).
+- **Lời giải:** nhảy qua hố tới chân tháp, bấm ⟳ (bản sao 1 làm bậc) → về đầu màn, đứng lên công tắc, bấm ⟳ (bản sao 2 giữ khóa mở) → về đầu màn, nhảy qua bản sao 2, qua hố, lên bản sao 1, lên tháp → chạm cờ. Làm theo thứ tự ngược lại cũng được.
+- **Chơi theo bản năng:** trèo lên được tháp nhưng chạm cờ đang khóa thì không thắng.
+- **Gợi ý 💡:** *"Cần hai bản sao: một bản đứng giữ công tắc, một bản làm bậc thang ở chân tháp."*
+- **Test:** `Level24_TwoClones_UnlockFlagAndClimbTower`, `Level24_LockedFlag_DoesNotWin`.
 
 ---
 
-### Level 24: Nghịch Lý Không Gian & Cầu Đảo Chiều (The Temporal Paradox — Màn kết Chương 6)
-- **Độ khó dự kiến:** `4/5` (Đỉnh cao kết hợp cơ chế).
-- **Ý tưởng "troll" & Tâm lý người chơi:** Màn chơi chia làm 2 tầng ngăn cách bởi vực thẳm. Ở giữa vực là một cây cầu xoay `RotatableBridge`. Phía trên trần có bẫy rơi, dưới sàn có công tắc khóa cờ, và cờ nằm trên đỉnh tháp cao. Người chơi phải phối hợp cả xoay cầu, tạo clone giữ cầu và né bẫy.
-- **Sơ đồ bố cục (ASCII Map):**
-```
-+-------------------------------------------------------------+
-|                                                  [FLAG-LOCK]|
-|   [P]                                            +---------+|
-|  =====                                           | THÁP CAO||
-|       \       [ROTATABLE BRIDGE]                 |         ||
-|        |         /===========/                   |         ||
-|        |        /  (CẦU XOAY)                    |         ||
-|        +-----------------------------------------+         ||
-|             [NÚT MỞ CỜ]         [BẪY RƠI TRÊN TRẦN]        ||
-|             +---------+         +-----------------+        ||
-|  ========================================================== |
-+-------------------------------------------------------------+
-```
-- **Bố cục chi tiết:**
-  - `RotatableBridge`: Cây cầu xoay bắc ngang vực, người chơi có thể dùng ngón tay vuốt để xoay nghiêng góc.
-  - `CloneManager`: Dùng để tạo bản sao đứng đè lên nút mở cờ ở tầng đáy.
-  - `FallingTrap`: Bẫy sập bảo vệ lối leo lên tháp.
-- **Các bước giải (Walkthrough):**
-  1. Người chơi nhảy xuống tầng đáy, kích hoạt bẫy rơi từ xa rồi lùi lại né bẫy.
-  2. Đứng lên nút bấm ở tầng đáy mở khóa cờ -> Bấm tạo Clone để Clone ở lại đè nút.
-  3. Người chơi respawn về bờ trái -> Vuốt xoay cây cầu `RotatableBridge` tạo thành một con dốc nghiêng 30 độ nối thẳng từ bờ trái lên đỉnh tháp.
-  4. Chạy vọt lên con dốc cầu xoay và nhảy thẳng vào lá cờ vàng đã mở khóa trên đỉnh tháp.
-- **Script / Prefab sử dụng:** [`RotatableBridge.cs`](../Assets/_Project/Scripts/RotatableBridge.cs), [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), [`PhysicalButton.cs`](../Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
-- **Nội dung Hint:** *"Xoay cầu làm dốc, hy sinh bản sao, đỉnh tháp vẫy gọi!"*
+## 3. Chương 7: "Bẻ Cong Thứ Nguyên" (Level 25 – Level 28)
 
----
+Chủ đề: không còn bản sao (⟳ trở lại là chơi lại). Người chơi phải **chạm/kéo vật thể trên màn hình** và **không tin vào mắt mình**.
 
-## 3. Thiết kế chi tiết Chương 7: "Bẻ Cong Thứ Nguyên" (Level 25 – Level 28)
+### Level 25: Cây Cầu Hỏng
+- **Câu đố HUD:** *"Cây cầu bị hỏng rồi, đừng đụng vào nó!"* · **Độ khó:** 3/5
+- **Bố cục:**
+```
+  [P]                 ╲  cầu gỗ nghiêng 45°                  [CỜ]
+ ████████████████      ╲                      ████████████████████
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲  (hố chông ≈ 6.0 > nhảy xa 4.9)
+```
+  - Hố x ≈ −3.2 … 3.2; cầu "CauXoay" (`RotatableBridge`) bắc trên hố, nghiêng −45°.
+- **Lời giải:** câu đố bảo "đừng đụng", nhưng phải chạm vào cầu và kéo cho nó nằm ngang → đi qua → chạm cờ.
+- **Chơi theo bản năng:** hố quá rộng để nhảy qua; đứng lên cầu nghiêng 45° là trượt xuống chông.
+- **Gợi ý 💡:** *"Chạm vào cây cầu rồi kéo lên/xuống để nó nằm ngang."*
+- **Test:** `Level25_FlattenBridge_CrossPit`, `Level25_TiltedBridge_CannotCross`.
 
-### Level 25: Bập Bênh Trọng Lực (Tilt of Faith)
-- **Độ khó dự kiến:** `3/5`.
-- **Ý tưởng "troll" & Tâm lý người chơi:** Giữa màn chơi là một cây cầu gỗ xoay quanh một trục cố định (`RotatableBridge`). Trên cầu có đặt một tảng đá/hộp nặng. Phía bên kia là một bức tường chông gai bảo vệ cờ. Người chơi không thể tự nhảy qua bức tường chông.
-- **Sơ đồ bố cục (ASCII Map):**
+### Level 26: Cờ Giả
+- **Câu đố HUD:** *"Về đích thật nhanh!"* · **Độ khó:** 3.5/5 (troll tâm lý)
+- **Bố cục:**
 ```
-+-------------------------------------------------------------+
-|                                                             |
-|   [P]            [HỘP ĐÁ]                         [FLAG]    |
-|  =====            [BOX]                           ======    |
-|             \==============o==============/       |CHÔNG|   |
-|                 (CẦU BẬP BÊNH XOAY - TRỤC O)      |GAI  |   |
-|  ========================================================== |
-|  (Vuốt màn hình để nghiêng cầu, trượt hộp đá phá hủy tường) |
-+-------------------------------------------------------------+
+ [BIỂN "Không có gì ở đây đâu"]  [P]                    [CỜ GIẢ]
+  (cờ thật nấp sau biển)
+ █████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+                                  ↑ từ x = −0.6: mặt đất ảo (không có va chạm)
 ```
-- **Bố cục chi tiết:**
-  - `RotatableBridge`: Gắn ở tâm màn chơi, có `maxTiltAngle = 45f`, phản hồi cử chỉ vuốt kéo của chuột/ngón tay.
-  - Hộp đá `PushableBox`: Có gắn `Rigidbody2D` Dynamic.
-  - Tường chông: Có thể bị đẩy vỡ hoặc lấp đầy hố khi hộp đá rơi vào.
-- **Các bước giải (Walkthrough):**
-  1. Người chơi không vội bước lên cầu. Dùng ngón tay chạm vào nửa bên trái của cầu và vuốt xuống để nâng đầu bên phải lên.
-  2. Sau đó vuốt mạnh đầu bên trái vểnh lên để cây cầu dốc ngược sang phải.
-  3. Chiếc hộp đá trượt tự do theo gia tốc trọng lực lao thẳng vào tường chông phía trước, san phẳng chướng ngại vật.
-  4. Người chơi xoay cầu trở lại vị trí nằm ngang và thong thả đi qua chạm cờ.
-- **Script / Prefab sử dụng:** [`RotatableBridge.cs`](../Assets/_Project/Scripts/RotatableBridge.cs), [`PushableBox.cs`](../Assets/_Project/Scripts/PushableBox.cs), `YellowFlag`.
-- **Nội dung Hint:** *"Cây cầu không chỉ để đi, nó còn là bệ phóng trượt dốc!"*
+  - Nhân vật x = −4.5, phía trước là cờ giả x = 4.5. Cờ thật x = −7.6, bị tấm biển (vẽ đè lên trên) che kín.
+- **Lời giải:** đừng tin lá cờ phía trước — quay lại, đi về bên trái, chạm vào tấm biển → thắng.
+- **Chơi theo bản năng:** chạy về phía cờ giả, rơi xuyên qua mặt đất ảo → chết.
+- **Gợi ý 💡:** *"Không phải lá cờ nào cũng thật, không phải mặt đất nào cũng đứng được. Thử quay lại phía sau xem."*
+- **Test:** `Level26_RealFlagIsBehindTheSign`, `Level26_FakeFlagSide_FallsThroughIllusion`.
 
----
+### Level 27: Mái Che Bằng Mây
+- **Câu đố HUD:** *"Trời sắp sập rồi!"* · **Độ khó:** 4/5
+- **Bố cục:** giống Level 23 (tấm chông treo + vùng kích hoạt), thêm một **đám mây kéo được** (`DraggableGround`, rộng 2.4) ở góc trên bên trái; không có bản sao. Nhân vật x = −7.5, cờ x = 7.2.
+- **Lời giải:** gợi nhớ Level 23 nhưng đổi công cụ: kéo đám mây xuống dưới mép trái tấm chông (ngoài vùng kích hoạt) làm cột chống → đi qua, tấm chông rơi và mắc lên mây → chạm cờ.
+- **Chơi theo bản năng:** bị tấm chông đè → chết.
+- **Gợi ý 💡:** *"Đám mây kéo được. Đặt nó dưới mép trái tấm chông trước khi đi qua."*
+- **Test:** `Level27_CloudAsRoof_StopsSlab`, `Level27_WithoutRoof_IsCrushed`.
 
-### Level 26: Chiếc Hộp Pandora & Cờ Giả Mạo (Pandora's Box & The Traitor Flag)
-- **Độ khó dự kiến:** `4/5`.
-- **Ý tưởng "troll" & Tâm lý người chơi:** Giữa màn chơi có một lá cờ vàng tuyệt đẹp cắm trên bệ. 99% người chơi sẽ lập tức chạy đến chạm vào lá cờ này. Tuy nhiên, lá cờ này được gắn script `FakeWinTrigger.cs`! Khi chạm vào, bảng Win giả hiện lên kèm tiếng cười trêu chọc rồi biến mất, sàn bên dưới sụp đổ và nhân vật rơi xuống vực chết.
-- **Sơ đồ bố cục (ASCII Map):**
+### Level 28: Thử Thách Cuối Cùng (màn kết toàn game)
+- **Câu đố HUD:** *"Thử thách cuối cùng"* · **Độ khó:** 5/5
+- **Bố cục:**
 ```
-+-------------------------------------------------------------+
-|                                                             |
-|               [CỜ GIẢ - FAKE WIN]                           |
-|                    [FLAG ẢO]                                |
-|   [P]             +---------+              [HỘP BÍ ẨN]      |
-|  =====            |BẪY SỤP  |              [MYSTERY BOX]    |
-|                   +---------+              +-----------+    |
-|  ========================================= | CỜ THẬT Ở |=== |
-|                                            | TRONG NÀY |    |
-+-------------------------------------------------------------+
+                                      ████████████████████  ← trần
+                                           ║
+  [P] [HỘP]  [CÔNG TẮC]▄▄   ╲ cầu 45°      ║ CỬA     [CỜ]
+ ██████████████████████       ╲        ████████████████████
+                      ↑ bậc chặn 1 ô
+                        ▲▲▲▲▲▲▲▲▲▲▲▲▲  (hố chông ≈ 6.0)
 ```
-- **Bố cục chi tiết:**
-  - Cờ giả: GameObject mang sprite YellowFlag nhưng gắn component [`FakeWinTrigger.cs`](../Assets/_Project/Scripts/FakeWin_Trigger.cs) và bẫy rơi.
-  - Hộp bí ẩn: GameObject gắn [`MysteryBox.cs`](../Assets/_Project/Scripts/MysteryBox.cs) hoặc [`MysterySimpleBox.cs`](../Assets/_Project/Scripts/MysterySimpleBox.cs).
-- **Các bước giải (Walkthrough):**
-  1. Người chơi phớt lờ lá cờ vàng hào nhoáng ở giữa phòng.
-  2. Nhảy qua bệ cờ giả, tiếp cận chiếc hộp bí ẩn `MysteryBox` ở góc phòng.
-  3. Dùng đầu cụng từ dưới lên hoặc bấm tương tác vào hộp -> Hộp bung ra và văng ra một lá cờ thật (`YellowFlag.cs`).
-  4. Chạm vào lá cờ thật để kích hoạt chiến thắng thực sự của `LevelManager.WinGame()`.
-- **Script / Prefab sử dụng:** [`FakeWin_Trigger.cs`](../Assets/_Project/Scripts/FakeWin_Trigger.cs), [`MysteryBox.cs`](../Assets/_Project/Scripts/MysteryBox.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
-- **Nội dung Hint:** *"Thấy vậy mà không phải vậy. Đừng tin vào ánh hoàng kim giả tạo!"*
-
----
-
-### Level 27: Nút Pause Đào Tẩu (The Runaway Pause Button)
-- **Độ khó dự kiến:** `4/5`.
-- **Ý tưởng "troll" & Tâm lý người chơi:** Một bức tường thành cao chót vót chia đôi bản đồ, nhân vật nhảy tối đa cũng chỉ đạt được 1/3 chiều cao tường. Không có thùng gỗ, không có đất kéo. Điều kỳ lạ là: nút Pause góc trên màn hình HUD có viền vật lý rung rinh! Người chơi có thể dùng tay "bóc" nút Pause khỏi giao diện và ném vào thế giới game.
-- **Sơ đồ bố cục (ASCII Map):**
-```
-+-------------------------------------------------------------+
-| [NÚT PAUSE VẬT LÝ] <--- (Có thể kéo thả)                    |
-|       \                                                     |
-|        \                                           [FLAG]   |
-|   [P]   \---> [KÉO NÚT PAUSE VÀO ĐÂY]      ||====  ======   |
-|  ====         [LÀM BẬC THANG DẬM NHẢY]     || TƯỜNG         |
-|               +----------------------+     || RẤT           |
-|                                            || CAO           |
-|  ========================================================== |
-+-------------------------------------------------------------+
-```
-- **Bố cục chi tiết:**
-  - Nút Pause: Được gắn script [`DraggableButton.cs`](../Assets/_Project/Scripts/DraggableButton.cs) hoặc [`DraggableUIPanel.cs`](../Assets/_Project/Scripts/DraggableUIPanel.cs), có `Rigidbody2D` Kinematic khi kéo và chuyển thành Dynamic/Solid khi thả vào thế giới game.
-  - Bức tường cao 6 mét, chia cách người chơi và lá cờ vàng.
-- **Các bước giải (Walkthrough):**
-  1. Người chơi thử nhảy vào tường nhưng thất bại.
-  2. Dùng ngón tay chạm giữ vào nút Pause trên HUD góc trên bên phải màn hình.
-  3. Kéo nút Pause thả xuống vị trí lơ lửng sát chân bức tường thành. Nút Pause biến thành một khối tảng đá vật lý vững chắc.
-  4. Người chơi nhảy lên nút Pause, rồi từ bề mặt nút Pause lấy đà nhảy vượt qua bức tường cao chạm cờ vàng.
-- **Script / Prefab sử dụng:** [`DraggableButton.cs`](../Assets/_Project/Scripts/DraggableButton.cs), [`PlayerController.cs`](../Assets/_Project/Scripts/PlayerController.cs), `YellowFlag`.
-- **Nội dung Hint:** *"Nút tạm dừng đâu nhất thiết phải nằm trên góc màn hình?"*
-
----
-
-### Level 28: Hỗn Mang Thứ Nguyên (Multiverse Mayhem — Màn kết toàn bộ Game)
-- **Độ khó dự kiến:** `5/5` (Đại kết cục — Thử thách trí tuệ tối thượng).
-- **Ý tưởng "troll" & Tâm lý người chơi:** Màn chơi quy tụ và kết hợp TOÀN BỘ các cơ chế đã học từ Level 1 đến Level 27. Người chơi phải phối hợp nhịp nhàng: Thao túng UI, nhân bản thế mạng, cân bằng cầu xoay bập bênh và giải mã cờ khóa.
-- **Sơ đồ bố cục (ASCII Map):**
-```
-+-------------------------------------------------------------+
-| [NÚT PAUSE UI]                         [BẪY RƠI TRÊN CAO]   |
-|                                        +----------------+   |
-|   [P]        [CẦU XOAY ROTATABLE]      | (KHIÊN CLONE)  |   |
-|  ====        /==================/      +----------------+   |
-|             /                                               |
-|       +----+------+                     [CỜ KHÓA DI ĐỘNG]   |
-|       |NÚT ĐÈ CLONE|                    [TRÊN ĐẤT KÉO THẢ]  |
-|  ========================================================== |
-+-------------------------------------------------------------+
-```
-- **Bố cục chi tiết:**
-  - `DraggableButton`: Nút Pause kéo xuống làm vật chặn góc cầu.
-  - `RotatableBridge`: Cầu bập bênh xoay để chuyển hướng hộp nặng.
-  - `CloneManager`: Tạo clone thế mạng chặn bẫy rơi từ trần cao.
-  - `PhysicalButton`: Công tắc mở khóa cờ.
-  - `DraggableGround`: Miếng đất cắm cờ có thể kéo sang trái/phải để đón người chơi.
-  - `YellowFlag`: Lá cờ đích thực thụ.
-- **Các bước giải (Walkthrough):**
-  1. **Bước 1 (Vô hiệu bẫy):** Nhảy lên không trung tạo Clone 1 để làm khiên che vòm bẫy rơi `FallingTrap`.
-  2. **Bước 2 (Mở cờ):** Đứng vào công tắc `PhysicalButton` tạo Clone 2 để duy trì mở khóa `YellowFlag`.
-  3. **Bước 3 (Bắc cầu):** Gỡ nút Pause trên HUD (`DraggableButton`) đặt vào khoảng trống nối đường lên cầu xoay `RotatableBridge`.
-  4. **Bước 4 (Kéo đích về):** Dùng ngón tay kéo thanh đất `DraggableGround` có cắm cờ từ tít góc xa kéo lại gần mép cầu.
-  5. **Bước 5 (Về đích):** Nhảy qua nút Pause, chạy qua cầu xoay và bước nhẹ lên bờ đất chạm cờ vàng, hoàn thành toàn bộ 28 màn chơi của trò chơi "Mr. Eggy"!
-- **Script / Prefab sử dụng:** [`CloneManager.cs`](../Assets/_Project/Scripts/CloneManager.cs), [`RotatableBridge.cs`](../Assets/_Project/Scripts/RotatableBridge.cs), [`DraggableButton.cs`](../Assets/_Project/Scripts/DraggableButton.cs), [`DraggableGround.cs`](../Assets/_Project/Scripts/DraggableGround.cs), [`FallingTrap.cs`](../Assets/_Project/Scripts/FallingTrap.cs), [`PhysicalButton.cs`](../Assets/_Project/Scripts/PhysicalButton.cs), [`YellowFlag.cs`](../Assets/_Project/Scripts/YellowFlag.cs).
-- **Nội dung Hint:** *"Hãy vận dụng tất cả những gì bạn đã học được: Clone, Cầu xoay, Nút UI và Kéo đất!"*
+  - Nhân vật x = −7.6; hộp gỗ x = −5.8; công tắc nằm sát chân một bậc chặn cao 1 ô (mép bờ trái hố); hố x ≈ −1.9 … 4.6 có cầu xoay nghiêng −45°; cửa x = 5.1 (công tắc ẩn cửa); cờ x = 7.8.
+- **Lời giải:** đẩy hộp tới khi nó tựa vào bậc chặn — lúc đó hộp nằm đúng trên công tắc, cửa mở → kéo cầu nằm ngang → nhảy lên hộp, lên bậc, đi qua cầu, qua cửa → chạm cờ. Kết hợp ba cơ chế của các chương trước: hộp (Ch.4), công tắc (Ch.6), cầu xoay (Ch.7).
+- **Chơi theo bản năng:** không có gì giữ công tắc → cửa đóng; cầu nghiêng thì trượt xuống chông.
+- **Gợi ý 💡:** *"Đẩy hộp lên công tắc để mở cửa, rồi kéo cầu nằm ngang."*
+- **Test:** `Level28_PushBoxOntoPlate_FlattenBridge`, `Level28_DoorClosedWithoutBox`.
 
 ---
 
@@ -295,14 +193,14 @@ Hai chương mở rộng tiếp nối tinh thần đó:
 | **L18** | Ch.5 | Cờ di động né tránh nhân vật | 3.5 | Troll đuổi bắt |
 | **L19** | Ch.5 | Đảo ngược trọng lực màn chơi | 3.5 | Thay đổi tư duy |
 | **L20** | Ch.5 | Màn kết chương: Hộp khổng lồ `GiantBox` vào đích | **4** | Cao trào Chương 5 |
-| **L21** | **Ch.6** | Nhân bản: Xác clone làm bậc thang | 2 | Giới thiệu Clone (Thả lỏng) |
-| **L22** | Ch.6 | Nhân bản: Clone đè công tắc `PhysicalButton` | 3 | Vận dụng Clone |
-| **L23** | Ch.6 | Nhân bản: Clone làm khiên chắn bẫy rơi | 3 | Thử thách kết hợp |
-| **L24** | Ch.6 | Màn kết chương: Clone + Cầu xoay + Bẫy | **4** | Cao trào Chương 6 |
-| **L25** | **Ch.7** | Cầu bập bênh xoay (`RotatableBridge`) | 3 | Giới thiệu xoay góc |
-| **L26** | Ch.7 | Chiếc hộp Pandora + Cờ giả (`FakeWinTrigger`) | 4 | Màn troll tâm lý cực đại |
-| **L27** | Ch.7 | Bóc nút Pause UI (`DraggableButton`) làm đệm dậm | 4 | Bẻ gãy bức tường thứ tư |
-| **L28** | Ch.7 | Đại kết cục: Phối hợp Clone + Bridge + UI + Ground | **5** | ĐỈNH CAO THỬ THÁCH (FINAL BOSS) |
+| **L21** | **Ch.6** | Bản sao làm bậc thang lên tường cao | 2 | Giới thiệu Clone (Thả lỏng) |
+| **L22** | Ch.6 | Bản sao giữ công tắc sàn `PressurePlate` mở cửa | 3 | Vận dụng Clone |
+| **L23** | Ch.6 | Bản sao giữa không trung chống tấm chông rơi | 3 | Thử thách kết hợp |
+| **L24** | Ch.6 | Màn kết chương: 2 bản sao (mở khóa cờ + bậc thang) + hố chông | **4** | Cao trào Chương 6 |
+| **L25** | **Ch.7** | Kéo cầu xoay (`RotatableBridge`) nằm ngang qua hố | 3 | Giới thiệu kéo thả |
+| **L26** | Ch.7 | Cờ giả + mặt đất ảo, cờ thật nấp sau biển | 3.5 | Màn troll tâm lý |
+| **L27** | Ch.7 | Kéo đám mây (`DraggableGround`) chống tấm chông rơi | 4 | Đổi công cụ cho bài toán L23 |
+| **L28** | Ch.7 | Đại kết cục: Hộp + Công tắc + Cầu xoay | **5** | ĐỈNH CAO THỬ THÁCH (FINAL BOSS) |
 
 ---
 
@@ -314,9 +212,9 @@ Hai chương mở rộng tiếp nối tinh thần đó:
 Độ khó (1 - 5)
  5 |                                                                     [*] L28
    |                                                                /
- 4 |                 [*] L16             [*] L20             [*] L24   [*] L26, L27
+ 4 |                 [*] L16             [*] L20             [*] L24   [*] L27
    |                /                   /                   /         /
- 3 |     [*] L04   /         [*] L12   /         [*] L22,L23   [*] L25
+ 3 |     [*] L04   /         [*] L12   /         [*] L22,L23   [*] L25, L26 (3.5)
    |    /         /         /         /         /
  2 | [*] L01-03 [*] L05-07 [*] L09-10  /       [*] L21 (Làm quen Clone)
    |                                  /

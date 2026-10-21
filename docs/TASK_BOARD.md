@@ -26,9 +26,9 @@
 | W1-07 | Cài package UGS (Auth, Cloud Save, Analytics, Leaderboards) | Codex | 👀 | `agent/codex-online` — ghim Auth 3.8.0, Cloud Save 3.4.2, Analytics 6.3.0, Leaderboards 2.3.4; cần Unity resolve package/lock |
 | W1-08 | Đăng nhập ẩn danh khi mở game | Codex | 👀 | `OnlineServicesBootstrap` tự tạo trước scene; fallback local; người dùng liên kết Project ID rồi kiểm thử Unity |
 | W1-09 | Schema Cloud Save & sự kiện Analytics | Codex | 👀 | `docs/ONLINE_SERVICES.md` — schema theo API Claude, hướng dẫn Dashboard/consent và ca kiểm thử |
-| W1-10 | GDD Chương 6 & 7 (8 màn) | Antigravity | 👀 | `docs/GDD_Chuong6_7.md` (Level 21–28, Clone & Bridge/UI) |
+| W1-10 | GDD Chương 6 & 7 (8 màn) | Antigravity → Claude | ✅ | `docs/GDD_Chuong6_7.md` — bản ý tưởng của Antigravity, Claude viết lại cho khớp code thật khi dựng màn (W1-12) |
 | W1-11 | Bảng quyết định luật 3 sao | Antigravity | 👀 | `docs/BANG_QUYET_DINH.md` (4 bảng: sao, hint, mở khóa, gộp cloud) |
-| W1-12 | Dựng Level 21–22 trong Unity | Người dùng | ⬜ | Theo GDD |
+| W1-12 | Dựng Level 21–22 trong Unity | Claude | 👀 | Nhánh `agent/claude-levels`: tool `Tools/Dựng màn/Chương 6–7`, test `Chapter67WalkthroughTests`. Người dùng chơi thử, chỉnh cảm giác |
 | W1-13 | Kế hoạch kiểm thử | Antigravity | 👀 | `docs/KE_HOACH_KIEM_THU.md` (chuẩn IEEE 829) |
 | W1-14 | Rà soát test cũ + ma trận truy vết | Antigravity | 👀 | `docs/MA_TRAN_TRUY_VET.md` (rà soát 15 test, bóc tách test giả) — 5 test giả đã được Claude Code viết lại gọi code thật (`agent/claude-tuan3`) |
 | W1-15 | Báo cáo Chương 1 + Use Case | Agent viết báo cáo | 🔄 | `docs/DACN_da_sua_chuong_1.docx` |
@@ -43,7 +43,7 @@
 | W2-05 | `CloudProgressStore` (implements `IProgressStore`) | Codex | 👀 | Load local ngay; tải/gộp async; nghe Changed, debounce 2 giây, write lock; cần kiểm thử UGS thật |
 | W2-06 | Xử lý mất mạng, đồng bộ lại | Codex | 👀 | Local trước, cờ pending bền, retry 5–60 giây, đọc lại mỗi lượt; 14 ca NUnit pass trong .NET giả lập, chưa chạy Unity |
 | W2-07 | `UnityAnalyticsReporter` (implements `IAnalyticsReporter`) + popup đồng ý | Codex | 👀 | Đủ 5 event; consent opt-in Unity 6000.6; có script nối popup, người dùng cần dựng/gắn UI và khai báo Dashboard |
-| W2-08 | Dựng Level 23–24 | Người dùng | ⬜ | |
+| W2-08 | Dựng Level 23–24 | Claude | 👀 | Như W1-12 (script mới `PressurePlate`, `ProximityActivator`) |
 | W2-09a | Logic 3 sao `StarCalculator` + theo dõi chết/hint trong màn | Claude Code | 👀 | `StarCalculator`, `LevelSession`; `LevelManager.LastStars` |
 | W2-09b | UI sao trên `WinCanvas` & nút LevelSelect (script + tool gán) | Antigravity | 👀 | `Assets/_Project/Scripts/UI/StarDisplay.cs` + `docs/HUONG_DAN_UI_SAO.md`; tool gán: menu **Tools/UI Sao** (Claude Code) |
 | W2-10 | Ca kiểm thử: sao, gộp cloud, mở khóa | Antigravity | 👀 | `docs/CA_KIEM_THU.md` (7 nhóm, 37 test cases) |
@@ -59,7 +59,7 @@
 | W3-03 | CI build APK khi push tag | Claude Code | 👀 | `.github/workflows/build-android.yml` (APK ký debug) |
 | W3-05 | Leaderboard + màn hình xếp hạng | Codex | 👀 | `agent/codex-tuan3` — tổng sao, debounce/retry, top 10 + hạng riêng, tool UI/consent có Undo; chờ kiểm thử UGS/UI thật |
 | W3-06 | Remote Config | Codex | 👀 | `agent/codex-tuan3` — package 4.2.5, GameConfig/Service, nối Ads/hint/skip; 18 test mới + 8 retry cũ pass; cần resolve/biên dịch Remote Config thật |
-| W3-07 | Dựng Level 25–28 | Người dùng | ⬜ | |
+| W3-07 | Dựng Level 25–28 | Claude | 👀 | Như W1-12; LevelSelect có thêm Chương 7 |
 | W3-09 | Playtest ≥ 10 người | Người dùng | ⬜ | Form khảo sát: Antigravity soạn |
 | W3-10 | Kiểm thử hồi quy | Antigravity | 👀 | `docs/KIEM_THU_HOI_QUY.md` (35 ca RG-01..35, smoke test 10 phút, ma trận phủ tự động 77.1%) |
 | W3-11 | Báo cáo Chương 3 | Agent viết báo cáo | ⬜ | |
