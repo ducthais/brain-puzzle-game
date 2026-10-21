@@ -1,0 +1,11 @@
+{
+    "name": "MainGameScripts.Online",
+    "references": [
+        "MainGameScripts",
+        "Unity.Services.Core",
+        "Unity.Services.Authentication",
+        "Unity.Services.CloudSave",
+        "Unity.Services.Analytics"
+    ],
+    "autoReferenced": true
+}

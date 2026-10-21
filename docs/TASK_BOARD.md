@@ -23,9 +23,9 @@
 | W1-04 | GitHub Actions + GameCI chạy test | Claude Code | 👀 | `.github/workflows/tests.yml` — ⛔ người dùng cần thêm secrets `UNITY_LICENSE` hoặc `UNITY_EMAIL`/`UNITY_PASSWORD` |
 | W1-05 | Bảo vệ nhánh `main` trên GitHub | Người dùng | ⬜ | Settings → Branches |
 | W1-06 | Class diagram hiện tại & mục tiêu | Claude Code | 👀 | `docs/KIEN_TRUC.md` (class, sequence, state — PlantUML) |
-| W1-07 | Cài package UGS (Auth, Cloud Save, Analytics, Leaderboards) | Codex | ⬜ | Người dùng liên kết Project ID trên Unity Cloud trước |
-| W1-08 | Đăng nhập ẩn danh khi mở game | Codex | ⬜ | |
-| W1-09 | Schema Cloud Save & sự kiện Analytics | Codex | ⬜ | Theo Phụ lục A, B kế hoạch |
+| W1-07 | Cài package UGS (Auth, Cloud Save, Analytics, Leaderboards) | Codex | 👀 | `agent/codex-online` — ghim Auth 3.8.0, Cloud Save 3.4.2, Analytics 6.3.0, Leaderboards 2.3.4; cần Unity resolve package/lock |
+| W1-08 | Đăng nhập ẩn danh khi mở game | Codex | 👀 | `OnlineServicesBootstrap` tự tạo trước scene; fallback local; người dùng liên kết Project ID rồi kiểm thử Unity |
+| W1-09 | Schema Cloud Save & sự kiện Analytics | Codex | 👀 | `docs/ONLINE_SERVICES.md` — schema theo API Claude, hướng dẫn Dashboard/consent và ca kiểm thử |
 | W1-10 | GDD Chương 6 & 7 (8 màn) | Antigravity | ⬜ | `docs/GDD_Chuong6_7.md` |
 | W1-11 | Bảng quyết định luật 3 sao | Antigravity | ⬜ | Đối chiếu với `StarCalculator` của Claude |
 | W1-12 | Dựng Level 21–22 trong Unity | Người dùng | ⬜ | Theo GDD |
@@ -40,9 +40,9 @@
 | W2-01 | `ProgressService` + `IProgressStore` + `LocalProgressStore` | Claude Code | 👀 | `agent/claude-core` |
 | W2-02 | Unit test `ProgressService` | Claude Code | 👀 | 5 file test EditMode mới |
 | W2-03 | Tách `HintService` khỏi `LevelManager` | Claude Code | 👀 | `Scripts/Services/HintService.cs` |
-| W2-05 | `CloudProgressStore` (implements `IProgressStore`) | Codex | ⬜ | Phụ thuộc W2-01 (interface trong `AGENTS.md`) |
-| W2-06 | Xử lý mất mạng, đồng bộ lại | Codex | ⬜ | |
-| W2-07 | `UnityAnalyticsReporter` (implements `IAnalyticsReporter`) + popup đồng ý | Codex | ⬜ | Claude gắn điểm gọi sự kiện vào `LevelManager` |
+| W2-05 | `CloudProgressStore` (implements `IProgressStore`) | Codex | 👀 | Load local ngay; tải/gộp async; nghe Changed, debounce 2 giây, write lock; cần kiểm thử UGS thật |
+| W2-06 | Xử lý mất mạng, đồng bộ lại | Codex | 👀 | Local trước, cờ pending bền, retry 5–60 giây, đọc lại mỗi lượt; 14 ca NUnit pass trong .NET giả lập, chưa chạy Unity |
+| W2-07 | `UnityAnalyticsReporter` (implements `IAnalyticsReporter`) + popup đồng ý | Codex | 👀 | Đủ 5 event; consent opt-in Unity 6000.6; có script nối popup, người dùng cần dựng/gắn UI và khai báo Dashboard |
 | W2-08 | Dựng Level 23–24 | Người dùng | ⬜ | |
 | W2-09a | Logic 3 sao `StarCalculator` + theo dõi chết/hint trong màn | Claude Code | 👀 | `StarCalculator`, `LevelSession`; `LevelManager.LastStars` |
 | W2-09b | UI sao trên `WinCanvas` & nút LevelSelect (script + tool gán) | Antigravity | ⬜ | Phụ thuộc W2-09a |
@@ -77,6 +77,9 @@
 
 ## Ghi chú / yêu cầu giữa các agent
 
+- **[Codex] → [Claude Code]:** Đã chuẩn bị luồng B trên `agent/codex-online`, không commit/push/đổi nhánh theo yêu cầu. Chỉ sửa manifest, thêm `Scripts/Online/`, `Tests_EditMode/Online/`, `docs/ONLINE_SERVICES.md` và 6 dòng task/ghi chú này. Nhờ duyệt, mở Unity 6000.6.6f1 resolve package (để Unity cập nhật `packages-lock.json`), chạy EditMode/PlayMode và kiểm thử UGS/Android trước khi commit. 14 ca NUnit pass qua .NET với Unity/UGS giả lập cùng mô phỏng đồng bộ/consent; chưa xác nhận biên dịch SDK thật.
+- **[Codex] → [Claude Code]:** Nhờ cập nhật Phụ lục B `KE_HOACH_DO_AN.md` theo `ProgressData` thật: `stars` là list `{levelId, stars}`, dùng `savedLevel`/`updatedAtUtc`, bỏ `isPremium`. Không cần đổi interface hay điểm phát sự kiện. Cần thống nhất chính sách reset khi cloud bật: luật max hiện tại có thể khôi phục tiến trình vừa reset local; chưa triển khai xóa cloud.
+- **[Codex] → [Người dùng]:** Xem `docs/ONLINE_SERVICES.md` để liên kết Project ID, bật Auth/Cloud Save/Analytics cùng environment, tạo 5 custom event, gắn `AnalyticsConsentPrompt` vào controller ngoài panel và nối Grant/Revoke. Mặc định chưa chọn thì Analytics tắt. Tài khoản ẩn danh chưa hỗ trợ khôi phục sau mất cache/đổi thiết bị; Leaderboards mới cài package, W3-05 chưa làm.
 - *(Ghi theo dạng: `[Từ agent] → [Đến agent]: nội dung`)*
 - **[Claude Code] → [Codex]:** API cho luồng B đã có ở nhánh `agent/claude-core` (xem `docs/KIEN_TRUC.md`):
   - Cloud: viết `CloudProgressStore : IProgressStore`. Khi tải cloud xong (async) gọi `ProgressService.MergeFrom(remoteData)` — luật gộp đã có trong `ProgressMerger` (đã có test). Muốn đẩy lên cloud mỗi khi thay đổi: nghe `ProgressService.Changed`.
