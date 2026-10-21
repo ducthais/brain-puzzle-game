@@ -53,7 +53,8 @@ public class LevelManager : MonoBehaviour
 
         // ĐÃ SỬA: Nếu là tài khoản Premium HOẶC đã xem quảng cáo mở khóa Hint ở màn này rồi thì mở thẳng luôn
         bool isPremium = PremiumManager.Instance != null && PremiumManager.Instance.IsPremium;
-        if (HintService.CanOpenHintDirectly(isPremium, isHintUnlockedCurrentLevel))
+        if (!GameConfigService.Current.HintRequiresAd
+            || HintService.CanOpenHintDirectly(isPremium, isHintUnlockedCurrentLevel))
         {
             OpenHintCanvas2(viaAd: false); // Xem luôn gợi ý, bỏ qua bước xem quảng cáo
         }
@@ -74,6 +75,12 @@ public class LevelManager : MonoBehaviour
     public void OnClickCo_Canvas1()
     {
         if (hintCanvas1 != null) hintCanvas1.SetActive(false);
+
+        if (!GameConfigService.Current.HintRequiresAd)
+        {
+            OpenHintCanvas2(viaAd: false);
+            return;
+        }
 
         if (AdManager.Instance != null)
         {
@@ -126,6 +133,7 @@ public class LevelManager : MonoBehaviour
     // ĐÃ NÂNG CẤP: Nút "NHẢY" (Bỏ qua màn) nằm trên Hint Canvas 2 đòi hỏi xem Ads ảo
     public void OnClickNhay_Canvas2()
     {
+        if (!GameConfigService.Current.SkipEnabled) return;
         if (hintCanvas2 != null) hintCanvas2.SetActive(false);
 
         // Gọi hệ thống quảng cáo đếm ngược trước khi cho phép người chơi ăn gian qua màn

@@ -10,7 +10,7 @@ public class AdManager : MonoBehaviour
 
     [Header("=== Cấu hình Interstitial ===")]
     public int levelsPerAd = 2; // Hiện quảng cáo sau 1-2 level
-    public int deathsPerAd = 2; // Khớp với thông số cài đặt = 2 trong ảnh của bạn để test nhanh
+    public int deathsPerAd = 9; // Mặc định = GameConfig.DefaultDeathsPerAd (prefab AdManager đang đặt 9)
 
     [Header("=== AdMob Unit IDs (Giữ nguyên cấu hình đồ án) ===")]
     public string interstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712";
@@ -34,6 +34,8 @@ public class AdManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        ApplyConfig(GameConfigService.Current);
+        GameConfigService.Changed += ApplyConfig;
 
         // Ẩn bảng quảng cáo ảo lúc mới khởi động game
         if (panelFakeAd != null) panelFakeAd.SetActive(false);
@@ -50,6 +52,18 @@ public class AdManager : MonoBehaviour
             _levelsCompletedSinceLastAd = 0;
             TryShowInterstitial("LevelComplete", null);
         }
+    }
+
+    private void ApplyConfig(GameConfig config)
+    {
+        levelsPerAd = config.LevelsPerAd;
+        deathsPerAd = config.DeathsPerAd;
+    }
+
+    private void OnDestroy()
+    {
+        GameConfigService.Changed -= ApplyConfig;
+        if (Instance == this) Instance = null;
     }
 
     // ĐÃ NÂNG CẤP: Nhận Callback hành động từ hệ thống PlayerDeath gửi sang

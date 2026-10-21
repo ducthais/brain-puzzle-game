@@ -57,8 +57,8 @@
 | W3-01 | Code coverage | Claude Code | 👀 | package `com.unity.testtools.codecoverage` + `coverageOptions` trong `tests.yml` |
 | W3-02 | Đo hiệu năng trên điện thoại | Người dùng | ⬜ | |
 | W3-03 | CI build APK khi push tag | Claude Code | 👀 | `.github/workflows/build-android.yml` (APK ký debug) |
-| W3-05 | Leaderboard + màn hình xếp hạng | Codex | ⬜ | |
-| W3-06 | Remote Config | Codex | ⬜ | |
+| W3-05 | Leaderboard + màn hình xếp hạng | Codex | 👀 | `agent/codex-tuan3` — tổng sao, debounce/retry, top 10 + hạng riêng, tool UI/consent có Undo; chờ kiểm thử UGS/UI thật |
+| W3-06 | Remote Config | Codex | 👀 | `agent/codex-tuan3` — package 4.2.5, GameConfig/Service, nối Ads/hint/skip; 18 test mới + 8 retry cũ pass; cần resolve/biên dịch Remote Config thật |
 | W3-07 | Dựng Level 25–28 | Người dùng | ⬜ | |
 | W3-09 | Playtest ≥ 10 người | Người dùng | ⬜ | Form khảo sát: Antigravity soạn |
 | W3-10 | Kiểm thử hồi quy | Antigravity | ⬜ | |
@@ -77,6 +77,8 @@
 
 ## Ghi chú / yêu cầu giữa các agent
 
+- **[Codex] → [Người dùng]:** W3-05/W3-06: trên Dashboard cùng project/environment, tạo leaderboard **`total_stars`**, **Descending + Keep Best**, không bucket/tier/reset định kỳ; bật Remote Config và publish 4 key `interstitial_levels` (Int, 2, khoảng 1–20), `interstitial_deaths` (Int, 2, khoảng 1–20), `hint_requires_ad` (Bool, true), `skip_enabled` (Bool, true). Xem mục 8–10 `docs/ONLINE_SERVICES.md`. Mở Unity resolve package 4.2.5 và để Unity cập nhật lock; chạy hai menu **Tools/Online/Tạo bảng xếp hạng** ở LevelSelect, **Tools/Online/Tạo popup đồng ý Analytics** ở StartScreen rồi kiểm tra bố cục/font, Undo và lưu scene. Chạy EditMode/PlayMode, Console và thử offline/online trên Editor/Android.
+- **[Codex] → [Claude Code]:** Đợt W3 ở `agent/codex-tuan3`, không commit/push/đổi nhánh. Không sửa scene/prefab, file Core có sẵn, Scripts/Editor, Scripts/UI hay Tests_PlayMode. `LevelManager` chỉ thêm kiểm tra config ở mở hint/xác nhận quảng cáo/handler Nhảy; `AdManager` nhận cấu hình qua Changed. 26 ca NUnit C# thuần pass; build kiểm tra MainGameScripts/Online/Online.Editor với DLL Unity 6000.6.6f1 + Leaderboards 2.3.4 thật pass, **riêng Remote Config dùng stub theo tài liệu** vì package chưa có và tải mạng bị chặn. Nhờ duyệt, resolve/biên dịch trong Unity và commit sau kiểm thử; harness ở Temp/W3Checks, không đưa stub vào Assets.
 - **[Codex] → [Claude Code]:** Đã chuẩn bị luồng B trên `agent/codex-online`, không commit/push/đổi nhánh theo yêu cầu. Chỉ sửa manifest, thêm `Scripts/Online/`, `Tests_EditMode/Online/`, `docs/ONLINE_SERVICES.md` và 6 dòng task/ghi chú này. Nhờ duyệt, mở Unity 6000.6.6f1 resolve package (để Unity cập nhật `packages-lock.json`), chạy EditMode/PlayMode và kiểm thử UGS/Android trước khi commit. 14 ca NUnit pass qua .NET với Unity/UGS giả lập cùng mô phỏng đồng bộ/consent; chưa xác nhận biên dịch SDK thật.
 - **[Codex] → [Claude Code]:** Nhờ cập nhật Phụ lục B `KE_HOACH_DO_AN.md` theo `ProgressData` thật: `stars` là list `{levelId, stars}`, dùng `savedLevel`/`updatedAtUtc`, bỏ `isPremium`. Không cần đổi interface hay điểm phát sự kiện. Cần thống nhất chính sách reset khi cloud bật: luật max hiện tại có thể khôi phục tiến trình vừa reset local; chưa triển khai xóa cloud.
 - **[Codex] → [Người dùng]:** Xem `docs/ONLINE_SERVICES.md` để liên kết Project ID, bật Auth/Cloud Save/Analytics cùng environment, tạo 5 custom event, gắn `AnalyticsConsentPrompt` vào controller ngoài panel và nối Grant/Revoke. Mặc định chưa chọn thì Analytics tắt. Tài khoản ẩn danh chưa hỗ trợ khôi phục sau mất cache/đổi thiết bị; Leaderboards mới cài package, W3-05 chưa làm.
