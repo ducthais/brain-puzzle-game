@@ -1,0 +1,56 @@
+# Build APK Android khi push tag dạng v* (VD: v0.5, v1.0) hoặc bấm chạy tay trong tab Actions.
+# APK được đính kèm vào GitHub Release cùng tên tag.
+# Dùng chung secrets với tests.yml (UNITY_LICENSE hoặc UNITY_EMAIL + UNITY_PASSWORD).
+# Chưa cấu hình keystore → APK ký bằng debug keystore (đủ để cài thử / playtest, chưa dùng để đưa lên Google Play).
+name: Build Android
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Dọn bớt dung lượng ổ đĩa (build Android cần nhiều chỗ)
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          android: false
+
+      - name: Checkout (kèm Git LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache thư mục Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-Android-
+
+      - name: Build
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: Android
+          androidExportType: androidPackage
+          buildName: MrEggy
+
+      - name: Lưu APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MrEggy-Android
+          path: build/Android
+
+      - name: Đính kèm APK vào GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/Android/*.apk

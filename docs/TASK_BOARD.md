@@ -54,9 +54,9 @@
 
 | ID | Task | Agent | Trạng thái | Nhánh / Ghi chú |
 |----|------|-------|-----------|-----------------|
-| W3-01 | Code coverage | Claude Code | ⬜ | |
+| W3-01 | Code coverage | Claude Code | 👀 | package `com.unity.testtools.codecoverage` + `coverageOptions` trong `tests.yml` |
 | W3-02 | Đo hiệu năng trên điện thoại | Người dùng | ⬜ | |
-| W3-03 | CI build APK khi push tag | Claude Code | ⬜ | |
+| W3-03 | CI build APK khi push tag | Claude Code | 👀 | `.github/workflows/build-android.yml` (APK ký debug) |
 | W3-05 | Leaderboard + màn hình xếp hạng | Codex | ⬜ | |
 | W3-06 | Remote Config | Codex | ⬜ | |
 | W3-07 | Dựng Level 25–28 | Người dùng | ⬜ | |
@@ -70,7 +70,7 @@
 |----|------|-------|-----------|-----------------|
 | W4-01 | Phân tích số liệu playtest | Codex + Antigravity | ⬜ | |
 | W4-02 | Cân bằng độ khó | Người dùng | ⬜ | |
-| W4-04 | Build release v1.0 + README | Claude Code (README) + Người dùng (build) | ⬜ | |
+| W4-04 | Build release v1.0 + README | Claude Code (README) + Người dùng (build) | 🔄 | README xong; build v1.0 ở tuần 4 |
 | W4-05 | Hồi quy trên ≥ 2 điện thoại | Người dùng | ⬜ | Checklist: Antigravity |
 | W4-06 | Báo cáo Chương 4–6 | Agent viết báo cáo | ⬜ | |
 | W4-07 | Slide + video demo | Antigravity (slide) + Người dùng (video) | ⬜ | |

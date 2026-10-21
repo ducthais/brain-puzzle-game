@@ -44,6 +44,8 @@ jobs:
           testMode: all
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Kết quả test Unity
+          # Đo độ bao phủ code (package com.unity.testtools.codecoverage) cho assembly game
+          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+MainGameScripts'
 
       - name: Lưu kết quả test
         if: always()
@@ -51,3 +53,10 @@ jobs:
         with:
           name: test-results
           path: ${{ steps.tests.outputs.artifactsPath }}
+
+      - name: Lưu báo cáo coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ${{ steps.tests.outputs.coveragePath }}
