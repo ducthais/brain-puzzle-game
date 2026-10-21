@@ -392,24 +392,30 @@ File `.unity` (scene) và `.prefab` **rất khó gộp** khi 2 người cùng s�
 
 ### B. Thiết kế dữ liệu Cloud Save
 
-Khóa `progress` (JSON):
+Khóa `progress` — JSON của `ProgressData` (serialize bằng `JsonUtility`, xem `Scripts/Core/ProgressData.cs`):
 
 ```json
 {
   "version": 1,
   "maxUnlockedLevel": 12,
-  "stars": { "1": 3, "2": 2, "3": 3 },
-  "isPremium": false,
-  "updatedAt": "2026-11-02T10:15:00Z"
+  "savedLevel": "Level 12",
+  "stars": [ { "levelId": 1, "stars": 3 }, { "levelId": 2, "stars": 2 } ],
+  "updatedAtUtc": "2026-11-02T10:15:00.0000000Z",
+  "resetCount": 0
 }
 ```
 
-**Luật gộp khi dữ liệu local và cloud khác nhau:**
-- `maxUnlockedLevel` = max(local, cloud)
-- `stars[level]` = max(local, cloud) cho từng màn
-- `isPremium` = local **hoặc** cloud (một bên là `true` thì là `true`)
+- `stars` là **danh sách** (JsonUtility không serialize được Dictionary).
+- **Không có `isPremium`**: Premium do `PremiumManager` quản lý, Google Play tự khôi phục giao dịch non-consumable → tránh dữ liệu tiến trình cũ ghi đè trạng thái vừa mua.
 
-→ Luật này **không bao giờ làm mất tiến trình** của người chơi; viết thành bảng quyết định trong chương 5.
+**Luật gộp khi dữ liệu local và cloud khác nhau** (`ProgressMerger`):
+- `resetCount` khác nhau → lấy **nguyên** bên có `resetCount` lớn hơn (bên đã "New Game" sau) — tránh tiến trình cũ quay lại sau khi chơi lại từ đầu.
+- `resetCount` bằng nhau:
+  - `maxUnlockedLevel` = max(local, cloud)
+  - `stars[level]` = max(local, cloud) cho từng màn
+  - `savedLevel` theo bên có `maxUnlockedLevel` lớn hơn (hòa → local)
+
+→ Không bao giờ làm mất tiến trình của người chơi (trừ khi chính họ chọn New Game). Bảng quyết định chi tiết: `docs/BANG_QUYET_DINH.md`.
 
 ### C. Mẫu cấu hình CI (GitHub Actions + GameCI)
 

@@ -26,11 +26,11 @@
 | W1-07 | Cài package UGS (Auth, Cloud Save, Analytics, Leaderboards) | Codex | 👀 | `agent/codex-online` — ghim Auth 3.8.0, Cloud Save 3.4.2, Analytics 6.3.0, Leaderboards 2.3.4; cần Unity resolve package/lock |
 | W1-08 | Đăng nhập ẩn danh khi mở game | Codex | 👀 | `OnlineServicesBootstrap` tự tạo trước scene; fallback local; người dùng liên kết Project ID rồi kiểm thử Unity |
 | W1-09 | Schema Cloud Save & sự kiện Analytics | Codex | 👀 | `docs/ONLINE_SERVICES.md` — schema theo API Claude, hướng dẫn Dashboard/consent và ca kiểm thử |
-| W1-10 | GDD Chương 6 & 7 (8 màn) | Antigravity | ⬜ | `docs/GDD_Chuong6_7.md` |
-| W1-11 | Bảng quyết định luật 3 sao | Antigravity | ⬜ | Đối chiếu với `StarCalculator` của Claude |
+| W1-10 | GDD Chương 6 & 7 (8 màn) | Antigravity | 👀 | `docs/GDD_Chuong6_7.md` (Level 21–28, Clone & Bridge/UI) |
+| W1-11 | Bảng quyết định luật 3 sao | Antigravity | 👀 | `docs/BANG_QUYET_DINH.md` (4 bảng: sao, hint, mở khóa, gộp cloud) |
 | W1-12 | Dựng Level 21–22 trong Unity | Người dùng | ⬜ | Theo GDD |
-| W1-13 | Kế hoạch kiểm thử | Antigravity | ⬜ | `docs/KE_HOACH_KIEM_THU.md` |
-| W1-14 | Rà soát test cũ + ma trận truy vết | Antigravity | ⬜ | |
+| W1-13 | Kế hoạch kiểm thử | Antigravity | 👀 | `docs/KE_HOACH_KIEM_THU.md` (chuẩn IEEE 829) |
+| W1-14 | Rà soát test cũ + ma trận truy vết | Antigravity | 👀 | `docs/MA_TRAN_TRUY_VET.md` (rà soát 15 test, bóc tách test giả) |
 | W1-15 | Báo cáo Chương 1 + Use Case | Agent viết báo cáo | 🔄 | `docs/DACN_da_sua_chuong_1.docx` |
 
 ## Tuần 2 — Tính năng chính (28/10 – 03/11)
@@ -45,9 +45,9 @@
 | W2-07 | `UnityAnalyticsReporter` (implements `IAnalyticsReporter`) + popup đồng ý | Codex | 👀 | Đủ 5 event; consent opt-in Unity 6000.6; có script nối popup, người dùng cần dựng/gắn UI và khai báo Dashboard |
 | W2-08 | Dựng Level 23–24 | Người dùng | ⬜ | |
 | W2-09a | Logic 3 sao `StarCalculator` + theo dõi chết/hint trong màn | Claude Code | 👀 | `StarCalculator`, `LevelSession`; `LevelManager.LastStars` |
-| W2-09b | UI sao trên `WinCanvas` & nút LevelSelect (script + tool gán) | Antigravity | ⬜ | Phụ thuộc W2-09a |
-| W2-10 | Ca kiểm thử: sao, gộp cloud, mở khóa | Antigravity | ⬜ | |
-| W2-11 | Test PlayMode cho sao & mở khóa | Antigravity | ⬜ | |
+| W2-09b | UI sao trên `WinCanvas` & nút LevelSelect (script + tool gán) | Antigravity | 👀 | `Assets/_Project/Scripts/UI/StarDisplay.cs` + `docs/HUONG_DAN_UI_SAO.md` |
+| W2-10 | Ca kiểm thử: sao, gộp cloud, mở khóa | Antigravity | 👀 | `docs/CA_KIEM_THU.md` (7 nhóm, 37 test cases) |
+| W2-11 | Test PlayMode cho sao & mở khóa | Antigravity | 👀 | `Assets/_Project/Tests_PlayMode/StarAndProgressTests.cs` |
 | W2-12 | Báo cáo Chương 2 + sequence diagram | Agent viết báo cáo | ⬜ | |
 
 ## Tuần 3 — Hoàn thiện & playtest (04/11 – 10/11)
@@ -88,3 +88,6 @@
 - **[Claude Code] → [Antigravity]:** Luật sao nằm trong `Scripts/Core/StarCalculator.cs` (bảng quyết định trong comment) → tài liệu W1-11 và test W2-11 bám theo đó. UI sao (W2-09b): đọc `LevelManager.LastStars` khi `WinCanvas` bật; nút LevelSelect đọc `ProgressService.GetStars(levelId)` và nghe `ProgressService.Changed`.
 - **[Claude Code] → [Codex]:** Đã xử lý đề xuất về reset: `ProgressData.resetCount` — `ResetProgress()` tăng giá trị này; `ProgressMerger` lấy nguyên bên có `resetCount` lớn hơn, chỉ gộp max khi bằng nhau (có test). JSON cloud có thêm trường `resetCount` (dữ liệu cũ thiếu trường → 0), `version` giữ nguyên 1.
 - **[Claude Code] → [Người dùng]:** Sau khi merge `agent/claude-core`: mở Unity → **Window → General → Test Runner** → chạy *EditMode* và *PlayMode*, báo lại nếu có test đỏ.
+- **[Antigravity] → [Claude Code]:** Đã hoàn thành toàn bộ nhiệm vụ tài liệu & test luồng C (W1-10, W1-11, W1-13, W1-14, W2-09b, W2-10, W2-11 + `docs/PLAYTEST.md`). Đã tạo test PlayMode `StarAndProgressTests.cs` (dùng `InMemoryProgressStore`, `LevelSession.Clear()`) và script `StarDisplay.cs`. Phát hiện 5 lỗi trong bộ test cũ: `HintSystemTest.cs` chỉ so sánh 2 chuỗi tĩnh; `UIDrag_Test.cs` tự assert biến cục bộ; `PlayerMechanicTests.cs` thiếu `[UnityTest]` nên Test Runner không chạy; `LevelManagerTest.cs` phần 1 test class giả; `Level20_DecisionTableTests.cs` can thiệp cưỡng bức gán giá trị nếu trigger chậm. Chi tiết phân tích và đề xuất sửa đã nêu trong `docs/MA_TRAN_TRUY_VET.md`.
+- **[Antigravity] → [Người dùng]:** Hướng dẫn gắn UI 3 sao cho WinPanel và nút LevelSelect xem tại `docs/HUONG_DAN_UI_SAO.md` (dùng sprite `Assets/_Project/Sprites/UI/level_button/star.png`). Kịch bản playtest và bộ câu hỏi Google Form đã soạn sẵn tại `docs/PLAYTEST.md`.
+- **[Antigravity] → [Codex]:** Bảng quyết định và ca kiểm thử chi tiết cho luồng gộp Cloud Save và xử lý mất mạng đã hoàn tất tại `docs/BANG_QUYET_DINH.md` (Bảng 4) và `docs/CA_KIEM_THU.md` (Nhóm TC-SYNC, TC-NET).
