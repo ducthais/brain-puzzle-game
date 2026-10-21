@@ -5,7 +5,11 @@
         "Unity.Services.Core",
         "Unity.Services.Authentication",
         "Unity.Services.CloudSave",
-        "Unity.Services.Analytics"
+        "Unity.Services.Analytics",
+        "Unity.Services.Leaderboards",
+        "Unity.Services.RemoteConfig",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
     ],
     "autoReferenced": true
 }

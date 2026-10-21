@@ -10,7 +10,13 @@ public sealed class OnlineServicesBootstrap : MonoBehaviour
 {
     private static OnlineServicesBootstrap instance;
     private CloudProgressStore store;
+    private LeaderboardScoreService leaderboard;
+    private RemoteGameConfigService remoteConfig;
     private CancellationTokenSource lifetime;
+
+    public static bool IsSignedIn => instance != null
+        && UnityServices.State == ServicesInitializationState.Initialized
+        && AuthenticationService.Instance.IsAuthorized;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics() => instance = null;
@@ -33,6 +39,8 @@ public sealed class OnlineServicesBootstrap : MonoBehaviour
         lifetime = new CancellationTokenSource();
         store = new CloudProgressStore();
         ProgressService.UseStore(store);
+        leaderboard = new LeaderboardScoreService();
+        remoteConfig = new RemoteGameConfigService();
         AnalyticsConsent.Apply();
     }
 
@@ -60,6 +68,8 @@ public sealed class OnlineServicesBootstrap : MonoBehaviour
                 {
                     retryAt = 0;
                     store.NetworkRestored();
+                    leaderboard.NetworkRestored();
+                    remoteConfig.NetworkRestored();
                 }
                 wasOffline = offline;
 
@@ -81,7 +91,8 @@ public sealed class OnlineServicesBootstrap : MonoBehaviour
                         token.ThrowIfCancellationRequested();
                         if (!AuthenticationService.Instance.IsAuthorized)
                             throw new InvalidOperationException("Phiên đăng nhập chưa được xác thực; chờ SDK khôi phục.");
-                        await store.SynchronizeAsync(token);
+                        await Task.WhenAll(store.SynchronizeAsync(token),
+                            leaderboard.SynchronizeAsync(token), remoteConfig.SynchronizeAsync(token));
                         retryDelay = 5;
                     }
                     catch (OperationCanceledException) when (token.IsCancellationRequested) { throw; }
@@ -105,7 +116,12 @@ public sealed class OnlineServicesBootstrap : MonoBehaviour
     private void OnApplicationPause(bool paused)
     {
         if (paused) PlayerPrefs.Save();
-        else store?.NetworkRestored();
+        else
+        {
+            store?.NetworkRestored();
+            leaderboard?.NetworkRestored();
+            remoteConfig?.NetworkRestored();
+        }
     }
 
     private void OnDestroy()
@@ -113,6 +129,7 @@ public sealed class OnlineServicesBootstrap : MonoBehaviour
         lifetime?.Cancel();
         lifetime?.Dispose();
         store?.Dispose();
+        leaderboard?.Dispose();
         if (instance == this)
         {
             instance = null;
