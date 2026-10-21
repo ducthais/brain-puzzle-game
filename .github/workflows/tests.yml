@@ -1,0 +1,53 @@
+# Chạy toàn bộ test EditMode + PlayMode của Unity mỗi khi có Pull Request hoặc push lên main.
+# Cần thêm secrets trong GitHub (Settings → Secrets and variables → Actions):
+#   UNITY_LICENSE  — nội dung file .ulf (Unity Personal), HOẶC
+#   UNITY_EMAIL + UNITY_PASSWORD — tài khoản Unity (GameCI tự kích hoạt license)
+# Hướng dẫn: https://game.ci/docs/github/activation
+name: Unity Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: EditMode + PlayMode
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout (kèm Git LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache thư mục Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: Library-
+
+      - name: Chạy test
+        id: tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: all
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Kết quả test Unity
+
+      - name: Lưu kết quả test
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ${{ steps.tests.outputs.artifactsPath }}

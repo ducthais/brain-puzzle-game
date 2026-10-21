@@ -19,10 +19,10 @@
 | ID | Task | Agent | Trạng thái | Nhánh / Ghi chú |
 |----|------|-------|-----------|-----------------|
 | W1-02 | Build thử APK Android, ghi lỗi | Người dùng | ⬜ | Làm sau khi merge W1-03 |
-| W1-03 | asmdef cho `Tests_EditMode` (chỉ Editor) | Claude Code | 🔄 | `agent/claude-core` |
-| W1-04 | GitHub Actions + GameCI chạy test | Claude Code | 🔄 | `agent/claude-core` — người dùng cần thêm secrets |
+| W1-03 | asmdef cho `Tests_EditMode` (chỉ Editor) | Claude Code | 👀 | `agent/claude-core` — `Tests_EditMode.asmdef` |
+| W1-04 | GitHub Actions + GameCI chạy test | Claude Code | 👀 | `.github/workflows/tests.yml` — ⛔ người dùng cần thêm secrets `UNITY_LICENSE` hoặc `UNITY_EMAIL`/`UNITY_PASSWORD` |
 | W1-05 | Bảo vệ nhánh `main` trên GitHub | Người dùng | ⬜ | Settings → Branches |
-| W1-06 | Class diagram hiện tại & mục tiêu | Claude Code | 🔄 | `docs/KIEN_TRUC.md` (PlantUML) |
+| W1-06 | Class diagram hiện tại & mục tiêu | Claude Code | 👀 | `docs/KIEN_TRUC.md` (class, sequence, state — PlantUML) |
 | W1-07 | Cài package UGS (Auth, Cloud Save, Analytics, Leaderboards) | Codex | ⬜ | Người dùng liên kết Project ID trên Unity Cloud trước |
 | W1-08 | Đăng nhập ẩn danh khi mở game | Codex | ⬜ | |
 | W1-09 | Schema Cloud Save & sự kiện Analytics | Codex | ⬜ | Theo Phụ lục A, B kế hoạch |
@@ -37,14 +37,14 @@
 
 | ID | Task | Agent | Trạng thái | Nhánh / Ghi chú |
 |----|------|-------|-----------|-----------------|
-| W2-01 | `ProgressService` + `IProgressStore` + `LocalProgressStore` | Claude Code | 🔄 | `agent/claude-core` |
-| W2-02 | Unit test `ProgressService` | Claude Code | 🔄 | |
-| W2-03 | Tách `HintService` khỏi `LevelManager` | Claude Code | ⬜ | |
+| W2-01 | `ProgressService` + `IProgressStore` + `LocalProgressStore` | Claude Code | 👀 | `agent/claude-core` |
+| W2-02 | Unit test `ProgressService` | Claude Code | 👀 | 5 file test EditMode mới |
+| W2-03 | Tách `HintService` khỏi `LevelManager` | Claude Code | 👀 | `Scripts/Services/HintService.cs` |
 | W2-05 | `CloudProgressStore` (implements `IProgressStore`) | Codex | ⬜ | Phụ thuộc W2-01 (interface trong `AGENTS.md`) |
 | W2-06 | Xử lý mất mạng, đồng bộ lại | Codex | ⬜ | |
 | W2-07 | `UnityAnalyticsReporter` (implements `IAnalyticsReporter`) + popup đồng ý | Codex | ⬜ | Claude gắn điểm gọi sự kiện vào `LevelManager` |
 | W2-08 | Dựng Level 23–24 | Người dùng | ⬜ | |
-| W2-09a | Logic 3 sao `StarCalculator` + theo dõi chết/hint trong màn | Claude Code | 🔄 | |
+| W2-09a | Logic 3 sao `StarCalculator` + theo dõi chết/hint trong màn | Claude Code | 👀 | `StarCalculator`, `LevelSession`; `LevelManager.LastStars` |
 | W2-09b | UI sao trên `WinCanvas` & nút LevelSelect (script + tool gán) | Antigravity | ⬜ | Phụ thuộc W2-09a |
 | W2-10 | Ca kiểm thử: sao, gộp cloud, mở khóa | Antigravity | ⬜ | |
 | W2-11 | Test PlayMode cho sao & mở khóa | Antigravity | ⬜ | |
@@ -78,3 +78,9 @@
 ## Ghi chú / yêu cầu giữa các agent
 
 - *(Ghi theo dạng: `[Từ agent] → [Đến agent]: nội dung`)*
+- **[Claude Code] → [Codex]:** API cho luồng B đã có ở nhánh `agent/claude-core` (xem `docs/KIEN_TRUC.md`):
+  - Cloud: viết `CloudProgressStore : IProgressStore`. Khi tải cloud xong (async) gọi `ProgressService.MergeFrom(remoteData)` — luật gộp đã có trong `ProgressMerger` (đã có test). Muốn đẩy lên cloud mỗi khi thay đổi: nghe `ProgressService.Changed`.
+  - `ProgressData` **không có `isPremium`** (Premium do `PremiumManager` + IAP khôi phục, tránh dữ liệu cũ ghi đè trạng thái vừa mua). `stars` là `List<LevelStars>` (để `JsonUtility` serialize được) → Phụ lục B của kế hoạch hiểu theo dạng này.
+  - Analytics: viết `UnityAnalyticsReporter : IAnalyticsReporter`, đăng ký bằng `GameAnalytics.UseReporter(...)` sau khi người chơi đồng ý. Điểm gọi sự kiện đã gắn sẵn trong `LevelManager` và `PlayerDeath` → **không cần sửa 2 file này**.
+- **[Claude Code] → [Antigravity]:** Luật sao nằm trong `Scripts/Core/StarCalculator.cs` (bảng quyết định trong comment) → tài liệu W1-11 và test W2-11 bám theo đó. UI sao (W2-09b): đọc `LevelManager.LastStars` khi `WinCanvas` bật; nút LevelSelect đọc `ProgressService.GetStars(levelId)` và nghe `ProgressService.Changed`.
+- **[Claude Code] → [Người dùng]:** Sau khi merge `agent/claude-core`: mở Unity → **Window → General → Test Runner** → chạy *EditMode* và *PlayMode*, báo lại nếu có test đỏ.

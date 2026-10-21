@@ -55,6 +55,14 @@ public class PlayerDeath : MonoBehaviour
         _isDead = true;
         Debug.Log($"[PlayerDeath] Nhân vật đã chết vì: {reason}");
 
+        // Ghi nhận số lần chết của lượt chơi (dùng để tính sao và phân tích độ khó)
+        LevelSession session = LevelSession.Current;
+        if (session != null)
+        {
+            session.RecordDeath();
+            GameAnalytics.Reporter.PlayerDeath(session.LevelId, session.Elapsed(Time.realtimeSinceStartup));
+        }
+
         if (AudioManager.Instance != null)
             AudioManager.Instance.PlaySFX(AudioManager.Instance.hurtSound);
 

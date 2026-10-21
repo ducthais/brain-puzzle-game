@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// Công cụ test: mở khóa / xóa tiến trình chơi (PlayerPrefs "MaxUnlockedLevel").
+/// Công cụ test: mở khóa / xóa tiến trình chơi (qua ProgressService).
 /// </summary>
 public static class DevProgressTools
 {
@@ -18,17 +18,16 @@ public static class DevProgressTools
             .DefaultIfEmpty(1)
             .Max();
 
-        PlayerPrefs.SetInt("MaxUnlockedLevel", lastLevel);
-        PlayerPrefs.Save();
+        ProgressService.UnlockUpTo(lastLevel);
         Debug.Log($"✅ Đã mở khóa Level 1 → Level {lastLevel}.");
     }
 
     [MenuItem("Tools/Test/Xóa tiến trình chơi")]
     public static void ResetProgress()
     {
-        PlayerPrefs.DeleteKey("MaxUnlockedLevel");
-        PlayerPrefs.DeleteKey("SavedLevel");
-        PlayerPrefs.Save();
-        Debug.Log("✅ Đã xóa tiến trình, chỉ còn Level 1 được mở.");
+        LocalProgressStore.DeleteAll();
+        ProgressService.Reload();
+        LevelSession.Clear();
+        Debug.Log("✅ Đã xóa tiến trình và số sao, chỉ còn Level 1 được mở.");
     }
 }

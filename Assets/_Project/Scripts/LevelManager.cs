@@ -1,8 +1,6 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
-using System.Linq;
 
 public class LevelManager : MonoBehaviour
 {
@@ -30,10 +28,20 @@ public class LevelManager : MonoBehaviour
     // BIẾN MỚI: Theo dõi trạng thái đã mở khóa Hint ở màn chơi hiện tại hay chưa
     private bool isHintUnlockedCurrentLevel = false;
 
+    /// <summary>Số sao đạt được ở lần thắng gần nhất (UI hiển thị sao đọc giá trị này).</summary>
+    public int LastStars { get; private set; }
+
     private void Start()
     {
         // Khi nạp vào màn chơi mới, luôn đặt trạng thái chưa mở khóa Hint
         isHintUnlockedCurrentLevel = false;
+
+        // Bắt đầu (hoặc tiếp tục sau khi chết) lượt chơi để đếm số lần chết / xem gợi ý
+        if (LevelNaming.TryParseLevelNumber(SceneManager.GetActiveScene().name, out int levelId))
+        {
+            LevelSession session = LevelSession.Begin(levelId, Time.realtimeSinceStartup);
+            GameAnalytics.Reporter.LevelStart(levelId, session.Attempt);
+        }
     }
 
     // Ấn nút Hint trên HUD màn hình chơi
@@ -44,9 +52,10 @@ public class LevelManager : MonoBehaviour
         Time.timeScale = 0f; // Tạm dừng thế giới vật lý của game
 
         // ĐÃ SỬA: Nếu là tài khoản Premium HOẶC đã xem quảng cáo mở khóa Hint ở màn này rồi thì mở thẳng luôn
-        if ((PremiumManager.Instance != null && PremiumManager.Instance.IsPremium) || isHintUnlockedCurrentLevel)
+        bool isPremium = PremiumManager.Instance != null && PremiumManager.Instance.IsPremium;
+        if (HintService.CanOpenHintDirectly(isPremium, isHintUnlockedCurrentLevel))
         {
-            OpenHintCanvas2(); // Xem luôn gợi ý, bỏ qua bước xem quảng cáo
+            OpenHintCanvas2(viaAd: false); // Xem luôn gợi ý, bỏ qua bước xem quảng cáo
         }
         else
         {
@@ -73,7 +82,7 @@ public class LevelManager : MonoBehaviour
                 {
                     // ĐÃ SỬA: Đánh dấu đã mở khóa thành công cho màn này vĩnh viễn (cho đến khi thắng)
                     isHintUnlockedCurrentLevel = true;
-                    OpenHintCanvas2();
+                    OpenHintCanvas2(viaAd: true);
                 },
                 onFailed: () =>
                 {
@@ -85,17 +94,23 @@ public class LevelManager : MonoBehaviour
         else
         {
             isHintUnlockedCurrentLevel = true;
-            OpenHintCanvas2();
+            OpenHintCanvas2(viaAd: false);
         }
     }
 
-    private void OpenHintCanvas2()
+    private void OpenHintCanvas2(bool viaAd)
     {
         string currentSceneName = SceneManager.GetActiveScene().name;
-        if (levelDatabase != null)
+        if (hintText2 != null)
         {
-            var levelData = levelDatabase.allLevels.FirstOrDefault(l => l.levelName == currentSceneName);
-            hintText2.text = (levelData != null) ? levelData.hintMessage : "Hãy thử tương tác với giao diện xem sao!";
+            hintText2.text = HintService.GetHint(levelDatabase, currentSceneName);
+        }
+
+        LevelSession session = LevelSession.Current;
+        if (session != null)
+        {
+            session.RecordHint();
+            GameAnalytics.Reporter.HintUsed(session.LevelId, viaAd);
         }
 
         if (hintCanvas1 != null) hintCanvas1.SetActive(false);
@@ -120,7 +135,7 @@ public class LevelManager : MonoBehaviour
                 onGranted: () =>
                 {
                     Time.timeScale = 1f; // Trả lại thời gian thực trước khi xử lý thắng cuộc
-                    WinGame();           // Xem xong Ads ảo -> Thắng màn ngay lập tức
+                    SkipLevel();         // Xem xong Ads ảo -> Thắng màn ngay lập tức
                 },
                 onFailed: () =>
                 {
@@ -133,14 +148,44 @@ public class LevelManager : MonoBehaviour
         {
             // Dự phòng an toàn nếu trong Scene thiếu Prefab AdManager
             Time.timeScale = 1f;
-            WinGame();
+            SkipLevel();
         }
     }
 
     public void WinGame()
     {
+        CompleteLevel(skipped: false);
+    }
+
+    // Bỏ qua màn bằng nút "NHẢY" → vẫn tính là qua màn nhưng chỉ được 1 sao
+    private void SkipLevel()
+    {
+        LevelSession session = LevelSession.Current;
+        if (session != null)
+            GameAnalytics.Reporter.LevelSkip(session.LevelId, session.Elapsed(Time.realtimeSinceStartup));
+
+        CompleteLevel(skipped: true);
+    }
+
+    private void CompleteLevel(bool skipped)
+    {
         if (isGameWon) return;
         isGameWon = true;
+
+        // === TÍNH SAO + LƯU TIẾN TRÌNH: Mở khóa level tiếp theo ===
+        // Làm trước khi bật WinPanel để UI hiển thị sao đọc được LastStars mới
+        int currentLevel = GetCurrentLevelNumber();
+        LevelSession session = LevelSession.Current != null && LevelSession.Current.LevelId == currentLevel
+            ? LevelSession.Current
+            : null;
+        int deaths = session?.Deaths ?? 0;
+        int hintsUsed = session?.HintsUsed ?? 0;
+        float duration = session?.Elapsed(Time.realtimeSinceStartup) ?? 0f;
+
+        LastStars = StarCalculator.Calculate(completed: true, skipped, deaths, hintsUsed);
+        ProgressService.CompleteLevel(currentLevel, nextLevelName, LastStars);
+        GameAnalytics.Reporter.LevelComplete(currentLevel, duration, deaths, hintsUsed, LastStars);
+        session?.Finish();
 
         if (AudioManager.Instance != null)
             AudioManager.Instance.PlaySFX(AudioManager.Instance.winSound);
@@ -149,30 +194,14 @@ public class LevelManager : MonoBehaviour
 
         if (winPanel != null) winPanel.SetActive(true);
         Time.timeScale = 0f;
-
-        // === LƯU TIẾN TRÌNH: Mở khóa level tiếp theo ===
-        int currentLevel = GetCurrentLevelNumber();
-        int maxUnlocked = PlayerPrefs.GetInt("MaxUnlockedLevel", 1);
-        if (currentLevel >= maxUnlocked)
-        {
-            PlayerPrefs.SetInt("MaxUnlockedLevel", currentLevel + 1);
-        }
-
-        PlayerPrefs.SetString("SavedLevel", nextLevelName);
-        PlayerPrefs.Save();
     }
 
     // Trích số level từ tên Scene hiện tại (VD: "Level 5" -> 5)
     private int GetCurrentLevelNumber()
     {
-        string sceneName = SceneManager.GetActiveScene().name;
-        string numberPart = sceneName.Replace("Level ", "");
-        int levelNumber;
-        if (int.TryParse(numberPart, out levelNumber))
-        {
-            return levelNumber;
-        }
-        return 1; // Mặc định nếu không parse được
+        return LevelNaming.TryParseLevelNumber(SceneManager.GetActiveScene().name, out int levelNumber)
+            ? levelNumber
+            : 1; // Mặc định nếu không parse được
     }
 
     // ==========================================

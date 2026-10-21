@@ -20,6 +20,7 @@ Kế hoạch tổng: [`docs/KE_HOACH_DO_AN.md`](docs/KE_HOACH_DO_AN.md) · Bản
 |-----------|----------|
 | `Assets/_Project/Scripts/` | Code game — assembly `MainGameScripts` (asmdef) |
 | `Assets/_Project/Scripts/Core/` | Logic thuần C# (không phụ thuộc MonoBehaviour), dễ unit test |
+| `Assets/_Project/Scripts/Services/` | Dịch vụ static dùng UnityEngine: `ProgressService`, `GameAnalytics`, `HintService`, `LocalProgressStore` |
 | `Assets/_Project/Scripts/Editor/` | Tool Editor — assembly `MainGameScripts.Editor` (chỉ Editor) |
 | `Assets/_Project/Tests_EditMode/` | Unit test EditMode |
 | `Assets/_Project/Tests_PlayMode/` | Test PlayMode — assembly `Tests_PlayMode` |
@@ -58,7 +59,8 @@ public interface IAnalyticsReporter
 }
 ```
 
-Chi tiết `ProgressData`, luật gộp dữ liệu, luật tính sao: xem code trong `Scripts/Core/` và Phụ lục A, B của kế hoạch.
+Đăng ký bản cài đặt: `ProgressService.UseStore(store)`, `GameAnalytics.UseReporter(reporter)`. Gộp dữ liệu cloud: `ProgressService.MergeFrom(remote)`.
+Chi tiết `ProgressData`, luật gộp dữ liệu, luật tính sao: xem code trong `Scripts/Core/` và [`docs/KIEN_TRUC.md`](docs/KIEN_TRUC.md).
 
 ## 5. Kiểm tra trước khi báo xong
 

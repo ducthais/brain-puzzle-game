@@ -40,6 +40,9 @@ public class LevelManagerTests
     [SetUp]
     public void Setup()
     {
+        // Tiến trình lưu trong bộ nhớ → WinGame() không ghi đè tiến trình thật trong PlayerPrefs
+        ProgressService.UseStore(new InMemoryProgressStore());
+
         gameObj = new GameObject("TestRoot");
         levelManager = gameObj.AddComponent<LevelManager>();
 
@@ -67,6 +70,8 @@ public class LevelManagerTests
         if (am != null) Object.DestroyImmediate(am.gameObject);
 
         Time.timeScale = 1f;
+        ProgressService.UseStore(null);
+        LevelSession.Clear();
 
         // Làm sạch bộ nhớ đệm sau khi kết thúc ca test
         PlayerPrefs.DeleteKey("isPremium");

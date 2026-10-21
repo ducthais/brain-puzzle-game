@@ -50,6 +50,11 @@ public class LevelSelectManager : MonoBehaviour
         RefreshLevelButtons();
     }
 
+    // Tiến trình thay đổi (VD: đồng bộ từ cloud xong) → cập nhật lại nút Level
+    private void OnEnable() => ProgressService.Changed += OnProgressChanged;
+    private void OnDisable() => ProgressService.Changed -= OnProgressChanged;
+    private void OnProgressChanged(ProgressData data) => RefreshLevelButtons();
+
     // ==========================================
     // ẨN TẤT CẢ ARROW (ĐƯỜNG NỐI ĐEN)
     // ==========================================
@@ -72,7 +77,7 @@ public class LevelSelectManager : MonoBehaviour
     public void RefreshLevelButtons()
     {
         // Level cao nhất đã mở khóa (mặc định = 1, tức Level 1 luôn mở)
-        int maxUnlocked = PlayerPrefs.GetInt("MaxUnlockedLevel", 1);
+        int maxUnlocked = ProgressService.MaxUnlockedLevel;
 
         for (int i = 0; i < levelButtons.Length; i++)
         {
@@ -140,14 +145,13 @@ public class LevelSelectManager : MonoBehaviour
     public void LoadLevel(int levelId)
     {
         // Kiểm tra level đã mở khóa chưa trước khi load
-        int maxUnlocked = PlayerPrefs.GetInt("MaxUnlockedLevel", 1);
-        if (levelId > maxUnlocked)
+        if (!ProgressService.IsUnlocked(levelId))
         {
             Debug.Log("Level " + levelId + " chưa được mở khóa!");
             return; // Không cho phép vào level chưa mở khóa
         }
 
-        string sceneName = "Level " + levelId; // Đảm bảo tên Scene khớp với định dạng này
+        string sceneName = LevelNaming.SceneNameFor(levelId); // Đảm bảo tên Scene khớp với định dạng "Level N"
         SceneManager.LoadScene(sceneName);
     }
 

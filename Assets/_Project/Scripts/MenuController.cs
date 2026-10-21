@@ -61,7 +61,7 @@ public class MenuController : MonoBehaviour
     public void OnContinueButtonClicked()
     {
         Debug.Log("Đang tải LevelSelect với tiến trình đã lưu");
-        // Tải Scene LevelSelect (tiến trình đã tự động được lưu trong PlayerPrefs)
+        // Tải Scene LevelSelect (tiến trình được lưu qua ProgressService)
         SceneManager.LoadScene("LevelSelect");
     }
 
@@ -78,11 +78,9 @@ public class MenuController : MonoBehaviour
     // Hàm này được gọi khi bấm "Có" trong bảng xác nhận New Game
     public void OnConfirmYesClicked()
     {
-        // Reset toàn bộ tiến trình game
-        PlayerPrefs.SetInt("MaxUnlockedLevel", 1);
-        PlayerPrefs.SetInt("CurrentLevel", 1);
-        PlayerPrefs.SetString("SavedLevel", "Level 1");
-        PlayerPrefs.Save();
+        // Reset toàn bộ tiến trình game (giữ nguyên Premium)
+        ProgressService.ResetProgress();
+        LevelSession.Clear();
 
         Debug.Log("Đã reset tiến trình game. Đang tải LevelSelect");
 
