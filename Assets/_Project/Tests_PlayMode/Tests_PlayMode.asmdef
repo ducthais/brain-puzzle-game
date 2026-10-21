@@ -6,8 +6,7 @@
         "UnityEditor.TestRunner",
         "MainGameScripts",
         "Unity.TextMeshPro",
-        "Unity.InputSystem",
-        "Unity.InputSystem.TestFramework"
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

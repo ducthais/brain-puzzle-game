@@ -2,22 +2,32 @@ using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
 
 /// <summary>
-/// Kiểm thử kéo-thả vật thể (DraggableCharacter) bằng chuột giả lập của Input System.
-/// InputTestFixture tạo môi trường input riêng → không ảnh hưởng chuột thật của Editor.
+/// Kiểm thử kéo-thả vật thể (DraggableCharacter) bằng chuột ảo của Input System.
+/// Chuột ảo được thêm riêng cho test và gỡ bỏ ở TearDown.
 /// </summary>
-public class UIDrag_Test : InputTestFixture
+public class UIDrag_Test
 {
     private GameObject cameraObj;
     private GameObject draggableObj;
     private Rigidbody2D rb;
     private Mouse mouse;
+    private InputSettings.BackgroundBehavior originalBackground;
+    private InputSettings.EditorInputBehaviorInPlayMode originalEditorBehavior;
 
-    public override void Setup()
+    [SetUp]
+    public void Setup()
     {
-        base.Setup();
+        // Chạy test không có Game view được focus (VD: dòng lệnh/CI) → cho input luôn tới game,
+        // trả lại giá trị cũ ở TearDown
+        InputSettings settings = InputSystem.settings;
+        originalBackground = settings.backgroundBehavior;
+        originalEditorBehavior = settings.editorInputBehaviorInPlayMode;
+        settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+        settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
 
         cameraObj = new GameObject("Test_MainCamera");
         cameraObj.tag = "MainCamera";
@@ -33,29 +43,37 @@ public class UIDrag_Test : InputTestFixture
         draggableObj.AddComponent<BoxCollider2D>().size = new Vector2(2f, 2f);
         draggableObj.AddComponent<DraggableCharacter>();
 
-        mouse = InputSystem.AddDevice<Mouse>();
+        mouse = InputSystem.AddDevice<Mouse>("Test_Mouse");
+        mouse.MakeCurrent(); // DraggableCharacter đọc Pointer.current
     }
 
-    public override void TearDown()
+    [TearDown]
+    public void Teardown()
     {
+        if (mouse != null && mouse.added) InputSystem.RemoveDevice(mouse);
         Object.Destroy(draggableObj);
         Object.Destroy(cameraObj);
-        base.TearDown();
+        InputSystem.settings.backgroundBehavior = originalBackground;
+        InputSystem.settings.editorInputBehaviorInPlayMode = originalEditorBehavior;
     }
 
-    private Vector2 ScreenPointOf(Vector3 worldPos)
+    // Gửi trạng thái chuột; Input System xử lý ở đầu frame kế tiếp → Update() thấy wasPressed/ReleasedThisFrame
+    private IEnumerator SendMouse(Vector3 worldPos, bool pressed)
     {
-        return Camera.main.WorldToScreenPoint(worldPos);
+        Vector2 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+        MouseState state = new MouseState { position = screenPos };
+        if (pressed) state = state.WithButton(MouseButton.Left);
+        InputSystem.QueueStateEvent(mouse, state);
+        yield return null;
     }
 
     [UnityTest]
     public IEnumerator TC_UC02_DT05_PointerHold_ChangesToKinematic()
     {
         yield return new WaitForFixedUpdate(); // Đồng bộ collider vào thế giới vật lý
+        yield return SendMouse(draggableObj.transform.position, pressed: false);
 
-        Move(mouse.position, ScreenPointOf(draggableObj.transform.position), queueEventOnly: true);
-        Press(mouse.leftButton, queueEventOnly: true);
-        yield return null; // Update() đọc wasPressedThisFrame
+        yield return SendMouse(draggableObj.transform.position, pressed: true);
 
         Assert.AreEqual(RigidbodyType2D.Kinematic, rb.bodyType,
             "Lỗi DT05: Vật thể không chuyển sang trạng thái Kinematic khi được cầm lên!");
@@ -66,13 +84,10 @@ public class UIDrag_Test : InputTestFixture
     public IEnumerator UIElement_Drag_FollowsPointer()
     {
         yield return new WaitForFixedUpdate();
+        yield return SendMouse(Vector3.zero, pressed: false);
+        yield return SendMouse(Vector3.zero, pressed: true);
 
-        Move(mouse.position, ScreenPointOf(Vector3.zero), queueEventOnly: true);
-        Press(mouse.leftButton, queueEventOnly: true);
-        yield return null;
-
-        Move(mouse.position, ScreenPointOf(new Vector3(2f, 1f, 0f)), queueEventOnly: true);
-        yield return null;
+        yield return SendMouse(new Vector3(2f, 1f, 0f), pressed: true);
 
         Assert.AreEqual(2f, draggableObj.transform.position.x, 0.05f, "Lỗi: Vật không đi theo con trỏ theo trục X!");
         Assert.AreEqual(1f, draggableObj.transform.position.y, 0.05f, "Lỗi: Vật không đi theo con trỏ theo trục Y!");
@@ -82,14 +97,11 @@ public class UIDrag_Test : InputTestFixture
     public IEnumerator UIElement_OnDrop_ChangesToDynamicPhysics()
     {
         yield return new WaitForFixedUpdate();
-
-        Move(mouse.position, ScreenPointOf(draggableObj.transform.position), queueEventOnly: true);
-        Press(mouse.leftButton, queueEventOnly: true);
-        yield return null;
+        yield return SendMouse(draggableObj.transform.position, pressed: false);
+        yield return SendMouse(draggableObj.transform.position, pressed: true);
         Assume.That(rb.bodyType, Is.EqualTo(RigidbodyType2D.Kinematic));
 
-        Release(mouse.leftButton, queueEventOnly: true);
-        yield return null;
+        yield return SendMouse(draggableObj.transform.position, pressed: false);
 
         Assert.AreEqual(RigidbodyType2D.Dynamic, rb.bodyType,
             "Lỗi DT06/OnDrop: Vật thể không kích hoạt trọng lực (Dynamic) để rơi tự do!");
@@ -99,10 +111,10 @@ public class UIDrag_Test : InputTestFixture
     public IEnumerator PointerPressOutsideObject_DoesNotPickUp()
     {
         yield return new WaitForFixedUpdate();
+        Vector3 outside = new Vector3(4f, 4f, 0f);
+        yield return SendMouse(outside, pressed: false);
 
-        Move(mouse.position, ScreenPointOf(new Vector3(4f, 4f, 0f)), queueEventOnly: true);
-        Press(mouse.leftButton, queueEventOnly: true);
-        yield return null;
+        yield return SendMouse(outside, pressed: true);
 
         Assert.AreEqual(RigidbodyType2D.Dynamic, rb.bodyType, "Lỗi: Bấm ra ngoài vật mà vật vẫn bị cầm lên!");
     }
